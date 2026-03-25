@@ -1,19 +1,16 @@
-"use client";
+import { getServices } from "@/lib/queries";
+import { getIcon } from "@/lib/iconMap";
+import { ErrorFallback } from "./ErrorFallback";
 
-import { Monitor, Code, Palette, Globe, Smartphone, PenTool, Layout, BarChart3 } from "lucide-react";
-
-const services = [
-  { icon: Monitor, title: "Logo Design" },
-  { icon: Code, title: "Web Design" },
-  { icon: Palette, title: "UX/UI Design" },
-  { icon: Globe, title: "Seo Marketing" },
-  { icon: Smartphone, title: "App Development" },
-  { icon: PenTool, title: "Content Writing" },
-  { icon: Layout, title: "Modern Design" },
-  { icon: BarChart3, title: "Resource Use" },
-];
-
-export default function Services() {
+export default async function Services() {
+  let services;
+  
+  try {
+    services = await getServices();
+  } catch (error) {
+    console.error('Failed to fetch services:', error);
+    return <ErrorFallback message="Unable to load services" />;
+  }
   return (
     <section id="services" className="dark-section py-20 lg:py-28 relative overflow-hidden">
       {/* Background Pattern */}
@@ -33,30 +30,34 @@ export default function Services() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
-          {services.map((service, index) => (
-            <div
-              key={service.title}
-              className="group relative p-8 lg:p-10 border border-white/10 hover:bg-primary transition-all duration-300 cursor-pointer"
-            >
-              {/* Icon */}
-              <div className="mb-6">
-                <service.icon className="w-16 h-16 text-primary group-hover:text-white transition-colors duration-300 stroke-1" />
+          {services.map((service, index) => {
+            const IconComponent = getIcon(service.icon_name);
+            
+            return (
+              <div
+                key={service.id}
+                className="group relative p-8 lg:p-10 border border-white/10 hover:bg-primary transition-all duration-300 cursor-pointer"
+              >
+                {/* Icon */}
+                <div className="mb-6">
+                  <IconComponent className="w-16 h-16 text-primary group-hover:text-white transition-colors duration-300 stroke-1" />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-teko text-xl uppercase tracking-wider text-white mb-4">
+                  {service.title}
+                </h3>
+
+                {/* Orange Bar */}
+                <div className="w-8 h-1 bg-primary group-hover:bg-white transition-colors duration-300" />
+
+                {/* Index Number */}
+                <span className="absolute bottom-4 right-4 font-teko text-4xl text-white/10 group-hover:text-white/30 transition-colors duration-300">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               </div>
-
-              {/* Title */}
-              <h3 className="font-teko text-xl uppercase tracking-wider text-white mb-4">
-                {service.title}
-              </h3>
-
-              {/* Orange Bar */}
-              <div className="w-8 h-1 bg-primary group-hover:bg-white transition-colors duration-300" />
-
-              {/* Index Number */}
-              <span className="absolute bottom-4 right-4 font-teko text-4xl text-white/10 group-hover:text-white/30 transition-colors duration-300">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
