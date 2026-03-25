@@ -1,7 +1,7 @@
-"use client";
-
 import Image from "next/image";
-import { Star, Shield } from "lucide-react";
+import { getAboutFeatures } from "@/lib/queries";
+import { getIcon } from "@/lib/iconMap";
+import { ErrorFallback } from "./ErrorFallback";
 
 const images = [
   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80",
@@ -10,20 +10,15 @@ const images = [
   "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
 ];
 
-const features = [
-  {
-    icon: Star,
-    title: "Pleasant Consulting",
-    description: "Lorem Ipsum nibh vel velit auctor aliquet. Aenean sollic tudin, lorem is simply free text quis bibendum.",
-  },
-  {
-    icon: Shield,
-    title: "Trusted Services",
-    description: "Lorem Ipsum nibh vel velit auctor aliquet. Aenean sollic tudin, lorem is simply free text quis bibendum.",
-  },
-];
-
-export default function About() {
+export default async function About() {
+  let features;
+  
+  try {
+    features = await getAboutFeatures();
+  } catch (error) {
+    console.error('Failed to fetch about features:', error);
+    return <ErrorFallback message="Unable to load about features" />;
+  }
   return (
     <section id="about" className="py-20 lg:py-28 bg-white">
       <div className="container mx-auto px-4 lg:px-8">
@@ -87,21 +82,24 @@ export default function About() {
 
             {/* Features */}
             <div className="space-y-6 mb-8">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex gap-4">
-                  <div className="w-14 h-14 bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-6 h-6 text-primary" />
+              {features.map((feature) => {
+                const IconComponent = getIcon(feature.icon_name);
+                return (
+                  <div key={feature.id} className="flex gap-4">
+                    <div className="w-14 h-14 bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <IconComponent className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-teko text-xl uppercase text-dark mb-1">
+                        {feature.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-teko text-xl uppercase text-dark mb-1">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Button */}
