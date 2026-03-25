@@ -1,33 +1,17 @@
-"use client";
-
 import Image from "next/image";
 import { User, MessageCircle, ArrowRight } from "lucide-react";
+import { getArticles } from "@/lib/queries";
+import { ErrorFallback } from "./ErrorFallback";
 
-const articles = [
-  {
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80",
-    date: "15 March 21",
-    author: "Diboli",
-    comments: 23,
-    title: "Time is money but its not full demand.",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80",
-    date: "22 March 21",
-    author: "Diboli",
-    comments: 23,
-    title: "We Are Trying To Do Best Work.",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&q=80",
-    date: "28 March 21",
-    author: "Diboli",
-    comments: 23,
-    title: "Nature is The best place for fresh mind.",
-  },
-];
-
-export default function News() {
+export default async function News() {
+  let articles;
+  
+  try {
+    articles = await getArticles();
+  } catch (error) {
+    console.error('Failed to fetch articles:', error);
+    return <ErrorFallback message="Unable to load articles. Please try again later." />;
+  }
   return (
     <section id="news" className="py-20 lg:py-28 bg-white">
       <div className="container mx-auto px-4 lg:px-8">
