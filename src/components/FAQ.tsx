@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { getFaqs } from "@/lib/queries";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorFallback } from "./ErrorFallback";
 import type { Database } from "@/lib/database.types";
 
 type Faq = Database['public']['Tables']['faqs']['Row'];
@@ -33,10 +35,7 @@ export default function FAQ() {
     return (
       <section className="dark-section py-20 lg:py-28">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="text-white/70 mt-4">Loading FAQs...</p>
-          </div>
+          <LoadingSpinner />
         </div>
       </section>
     );
@@ -46,16 +45,7 @@ export default function FAQ() {
     return (
       <section className="dark-section py-20 lg:py-28">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center">
-            <p className="text-white/70 mb-4">{error}</p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="inline-block border-2 border-primary text-primary px-10 py-4 font-teko text-lg uppercase tracking-wider hover:bg-primary hover:text-white transition-all duration-300"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorFallback message={error} />
         </div>
       </section>
     );

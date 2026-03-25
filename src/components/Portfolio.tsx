@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { getProjects } from "@/lib/queries";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorFallback } from "./ErrorFallback";
 import type { Database } from "@/lib/database.types";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
@@ -47,9 +49,7 @@ export default function Portfolio() {
             <p className="section-title">Features Project</p>
             <h2 className="heading-md text-dark">Explore Our Project.</h2>
           </div>
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+          <LoadingSpinner />
         </div>
       </section>
     );
@@ -63,16 +63,7 @@ export default function Portfolio() {
             <p className="section-title">Features Project</p>
             <h2 className="heading-md text-dark">Explore Our Project.</h2>
           </div>
-          <div className="py-20 text-center">
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-primary text-white hover:bg-primary/90 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorFallback message={error} />
         </div>
       </section>
     );
