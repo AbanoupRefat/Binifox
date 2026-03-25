@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Users, Smile, Award, Settings } from "lucide-react";
+import { getStats } from "@/lib/queries";
+import { getIcon } from "@/lib/iconMap";
+import type { Database } from "@/lib/database.types";
 
-const stats = [
-  { icon: Users, value: 4932, label: "Expert Members" },
-  { icon: Smile, value: 1401, label: "Satisfied Clients" },
-  { icon: Award, value: 8184, label: "Problem Solve" },
-  { icon: Settings, value: 1385, label: "Award Winner" },
-];
+type Stat = Database['public']['Tables']['stats']['Row'];
 
 function Counter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -51,6 +48,61 @@ function Counter({ end, duration = 2000 }: { end: number; duration?: number }) {
 }
 
 export default function Stats() {
+  const [stats, setStats] = useState<Stat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getStats()
+      .then((data) => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch stats:', err);
+        setError('Unable to load statistics');
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <section
+        className="py-20 lg:py-28 relative bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: "url(https://ext.same-assets.com/2464002308/3996784431.jpeg)" }}
+      >
+        <div className="absolute inset-0 bg-dark/90" />
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="text-center text-white">
+            <p className="text-lg">Loading statistics...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section
+        className="py-20 lg:py-28 relative bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: "url(https://ext.same-assets.com/2464002308/3996784431.jpeg)" }}
+      >
+        <div className="absolute inset-0 bg-dark/90" />
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="text-center text-white">
+            <p className="text-lg text-red-400">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-6 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className="py-20 lg:py-28 relative bg-cover bg-center bg-fixed"
@@ -60,24 +112,27 @@ export default function Stats() {
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center text-white">
-              {/* Icon */}
-              <div className="w-20 h-20 mx-auto mb-6 border-2 border-primary rounded-full flex items-center justify-center">
-                <stat.icon className="w-8 h-8 text-primary" />
-              </div>
+          {stats.map((stat) => {
+            const Icon = getIcon(stat.icon_name);
+            return (
+              <div key={stat.id} className="text-center text-white">
+                {/* Icon */}
+                <div className="w-20 h-20 mx-auto mb-6 border-2 border-primary rounded-full flex items-center justify-center">
+                  <Icon className="w-8 h-8 text-primary" />
+                </div>
 
-              {/* Number */}
-              <div className="font-teko text-5xl lg:text-6xl font-bold mb-2">
-                <Counter end={stat.value} />
-              </div>
+                {/* Number */}
+                <div className="font-teko text-5xl lg:text-6xl font-bold mb-2">
+                  <Counter end={stat.value} />
+                </div>
 
-              {/* Label */}
-              <p className="font-teko text-lg uppercase tracking-wider text-white/80">
-                {stat.label}
-              </p>
-            </div>
-          ))}
+                {/* Label */}
+                <p className="font-teko text-lg uppercase tracking-wider text-white/80">
+                  {stat.label}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
