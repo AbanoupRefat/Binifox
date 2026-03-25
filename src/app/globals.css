@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&family=Teko:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 228 7% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 228 7% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 228 7% 16%;
+    --primary: 30 91% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 7% 16%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 5% 40%;
+    --muted-foreground: 220 5% 60%;
+    --accent: 30 91% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 5% 90%;
+    --input: 220 5% 90%;
+    --ring: 30 91% 55%;
+    --radius: 0rem;
+  }
+
+  .dark {
+    --background: 228 7% 16%;
+    --foreground: 0 0% 100%;
+    --card: 228 7% 20%;
+    --card-foreground: 0 0% 100%;
+    --popover: 228 7% 16%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 30 91% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 7% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 5% 40%;
+    --muted-foreground: 220 5% 70%;
+    --accent: 30 91% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 228 7% 25%;
+    --input: 228 7% 25%;
+    --ring: 30 91% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-rubik antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-teko uppercase tracking-wide;
+  }
+}
+
+@layer components {
+  .section-title {
+    @apply text-primary text-sm tracking-[3px] uppercase font-medium mb-2;
+  }
+
+  .heading-lg {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-tight;
+  }
+
+  .heading-md {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold uppercase leading-tight;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-8 py-4 uppercase font-teko text-lg tracking-wider hover:bg-primary/90 transition-all duration-300;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary px-8 py-4 uppercase font-teko text-lg tracking-wider hover:bg-primary hover:text-white transition-all duration-300;
+  }
+
+  .dark-section {
+    @apply bg-[#26272d] text-white;
+  }
+
+  .orange-bar {
+    @apply w-12 h-1 bg-primary;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
