@@ -1,51 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { getProjects } from "@/lib/queries";
+import type { Database } from "@/lib/database.types";
+
+type Project = Database["public"]["Tables"]["projects"]["Row"];
 
 const categories = ["Show All", "Design", "Logo", "Business", "Agency"];
 
-const projects = [
-  {
-    image: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80",
-    title: "Binifox Business",
-    category: "Business",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80",
-    title: "Marketing Analysis",
-    category: "Design",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
-    title: "Business Idea",
-    category: "Logo",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80",
-    title: "Consultation",
-    category: "Agency",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80",
-    title: "Digital Marketing",
-    category: "Business",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&q=80",
-    title: "Super Experience",
-    category: "Design",
-  },
-];
-
 export default function Portfolio() {
   const [activeCategory, setActiveCategory] = useState("Show All");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        setLoading(true);
+        const data = await getProjects();
+        setProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        setError("Unable to load projects. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProjects();
+  }, []);
 
   const filteredProjects =
     activeCategory === "Show All"
       ? projects
       : projects.filter((p) => p.category === activeCategory);
+
+  if (loading) {
+    return (
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="section-title">Features Project</p>
+            <h2 className="heading-md text-dark">Explore Our Project.</h2>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="section-title">Features Project</p>
+            <h2 className="heading-md text-dark">Explore Our Project.</h2>
+          </div>
+          <div className="py-20 text-center">
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-primary text-white hover:bg-primary/90 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 lg:py-28 bg-white">
