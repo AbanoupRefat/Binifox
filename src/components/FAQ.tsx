@@ -1,29 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { getFaqs } from "@/lib/queries";
+import type { Database } from "@/lib/database.types";
 
-const faqs = [
-  {
-    question: "How can we help your business?",
-    answer: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  },
-  {
-    question: "What are the advantages of Binifox?",
-    answer: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  },
-  {
-    question: "Let's find an office near you?",
-    answer: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  },
-  {
-    question: "Binifox WordPress theme for business?",
-    answer: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  },
-];
+type Faq = Database['public']['Tables']['faqs']['Row'];
 
 export default function FAQ() {
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState(0);
+
+  useEffect(() => {
+    async function fetchFaqs() {
+      try {
+        const data = await getFaqs();
+        setFaqs(data);
+      } catch (err) {
+        console.error('Failed to fetch FAQs:', err);
+        setError('Unable to load FAQs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchFaqs();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="dark-section py-20 lg:py-28">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p className="text-white/70 mt-4">Loading FAQs...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="dark-section py-20 lg:py-28">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center">
+            <p className="text-white/70 mb-4">{error}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="inline-block border-2 border-primary text-primary px-10 py-4 font-teko text-lg uppercase tracking-wider hover:bg-primary hover:text-white transition-all duration-300"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="dark-section py-20 lg:py-28">
@@ -50,7 +86,7 @@ export default function FAQ() {
           <div className="space-y-4">
             {faqs.map((faq, index) => (
               <div
-                key={faq.question}
+                key={faq.id}
                 className={`border border-white/10 ${
                   openIndex === index ? "bg-primary" : ""
                 } transition-all duration-300`}
