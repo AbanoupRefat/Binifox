@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Database } from './database.types'
 
+// Type aliases for cleaner code
 type Project = Database['public']['Tables']['projects']['Row']
 type Article = Database['public']['Tables']['articles']['Row']
 type Service = Database['public']['Tables']['services']['Row']
@@ -9,6 +10,9 @@ type Faq = Database['public']['Tables']['faqs']['Row']
 type Stat = Database['public']['Tables']['stats']['Row']
 type AboutFeature = Database['public']['Tables']['about_features']['Row']
 
+/**
+ * Fetch all projects ordered by creation date (newest first)
+ */
 export async function getProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('projects')
@@ -19,6 +23,9 @@ export async function getProjects(): Promise<Project[]> {
   return data || []
 }
 
+/**
+ * Fetch all articles ordered by date (newest first)
+ */
 export async function getArticles(): Promise<Article[]> {
   const { data, error } = await supabase
     .from('articles')
@@ -29,6 +36,9 @@ export async function getArticles(): Promise<Article[]> {
   return data || []
 }
 
+/**
+ * Fetch all services ordered by display order
+ */
 export async function getServices(): Promise<Service[]> {
   const { data, error } = await supabase
     .from('services')
@@ -39,6 +49,9 @@ export async function getServices(): Promise<Service[]> {
   return data || []
 }
 
+/**
+ * Fetch all team members
+ */
 export async function getTeamMembers(): Promise<TeamMember[]> {
   const { data, error } = await supabase
     .from('team_members')
@@ -48,6 +61,9 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
   return data || []
 }
 
+/**
+ * Fetch all FAQs ordered by display order
+ */
 export async function getFaqs(): Promise<Faq[]> {
   const { data, error } = await supabase
     .from('faqs')
@@ -58,6 +74,9 @@ export async function getFaqs(): Promise<Faq[]> {
   return data || []
 }
 
+/**
+ * Fetch all stats ordered by display order
+ */
 export async function getStats(): Promise<Stat[]> {
   const { data, error } = await supabase
     .from('stats')
@@ -68,6 +87,9 @@ export async function getStats(): Promise<Stat[]> {
   return data || []
 }
 
+/**
+ * Fetch all about features ordered by display order
+ */
 export async function getAboutFeatures(): Promise<AboutFeature[]> {
   const { data, error } = await supabase
     .from('about_features')
