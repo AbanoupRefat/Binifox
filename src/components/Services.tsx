@@ -5,6 +5,7 @@ import { getServices } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorFallback } from "./ErrorFallback";
+import Link from "next/link";
 import type { Database } from "@/lib/database.types";
 
 type Service = Database['public']['Tables']['services']['Row'];
@@ -55,8 +56,9 @@ export default function Services() {
           {services.map((service, index) => {
             const IconComponent = getIcon(service.icon_name);
             return (
-              <div
+              <Link
                 key={service.id}
+                href={`/services/${service.id}`}
                 className="group relative p-8 lg:p-10 border border-white/10 hover:bg-primary transition-all duration-300 cursor-pointer"
               >
                 <div className="mb-6">
@@ -69,7 +71,7 @@ export default function Services() {
                 <span className="absolute bottom-4 right-4 font-teko text-4xl text-white/10 group-hover:text-white/30 transition-colors duration-300">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-              </div>
+              </Link>
             );
           })}
         </div>

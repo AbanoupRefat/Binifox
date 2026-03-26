@@ -29,6 +29,11 @@ export interface Database {
           id: string
           icon_name: string
           title: string
+          description: string | null
+          short_description: string | null
+          image_url: string | null
+          features: string[] | null
+          process_steps: string[] | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['services']['Row'], 'id' | 'created_at'>

@@ -5,7 +5,7 @@ import { getServiceById, getServices } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 
 export const metadata = {
   title: "Service Details - Binifox",
@@ -31,9 +31,11 @@ export default async function ServiceDetailPage({
 }) {
   const { id } = await params;
   let service;
+  let allServices: any[] = [];
 
   try {
     service = await getServiceById(id);
+    allServices = await getServices();
   } catch (error) {
     console.error("Error fetching service:", error);
   }
@@ -51,18 +53,55 @@ export default async function ServiceDetailPage({
   }
 
   const IconComponent = getIcon(service.icon_name);
+  const currentIndex = allServices.findIndex(s => s.id === service.id);
+  const previousService = currentIndex > 0 ? allServices[currentIndex - 1] : allServices[allServices.length - 1];
+  const nextService = currentIndex < allServices.length - 1 ? allServices[currentIndex + 1] : allServices[0];
+
+  // Parse features and process steps if they're stored as JSON strings
+  const features = Array.isArray(service.features) 
+    ? service.features 
+    : service.features ? JSON.parse(service.features) : [
+        "Research beyond the business plan",
+        "Marketing options and rates",
+        "The ability to turnaround consulting",
+        "Customer engagement matters"
+      ];
+
+  const processSteps = Array.isArray(service.process_steps)
+    ? service.process_steps
+    : service.process_steps ? JSON.parse(service.process_steps) : [
+        "Consultation & Planning",
+        "Design & Development",
+        "Testing & QA",
+        "Launch & Support"
+      ];
 
   return (
     <>
       <Header />
       <main className="pt-20">
-        {/* Page Header */}
-        <section className="bg-gradient-to-r from-dark to-dark/80 py-20 lg:py-32">
-          <div className="container mx-auto px-4 lg:px-8">
+        {/* Page Header with Background Image */}
+        <section className="relative py-20 lg:py-32 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-dark to-dark/80 z-0" />
+          {service.image_url && (
+            <div className="absolute inset-0 opacity-20">
+              <img 
+                src={service.image_url} 
+                alt={service.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className="container mx-auto px-4 lg:px-8 relative z-10">
             <div className="text-center">
-              <h1 className="heading-lg text-white mb-4">Service Details</h1>
-              <p className="text-white/70 text-lg">
-                Learn more about our services
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 flex items-center justify-center bg-primary/20 rounded-lg border border-primary/50">
+                  <IconComponent className="w-12 h-12 text-primary stroke-1" />
+                </div>
+              </div>
+              <h1 className="heading-lg text-white mb-4">{service.title}</h1>
+              <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                {service.short_description || "Professional service tailored to meet your business needs"}
               </p>
             </div>
           </div>
@@ -71,83 +110,97 @@ export default async function ServiceDetailPage({
         {/* Service Details Section */}
         <section className="py-20 lg:py-28 bg-white">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              {/* Service Icon */}
-              <div className="flex justify-center mb-12">
-                <div className="w-24 h-24 flex items-center justify-center bg-primary/10 rounded-lg">
-                  <IconComponent className="w-16 h-16 text-primary stroke-1" />
+            <div className="max-w-5xl mx-auto">
+              {/* Main Description */}
+              <div className="mb-16">
+                <h2 className="text-3xl font-teko font-bold text-dark mb-6">Overview</h2>
+                <p className="text-gray-700 leading-relaxed text-lg mb-6">
+                  {service.description || `Need something changed or is there something not quite working the way you envisaged? Is your service a little old and tired and need refreshing? We provide professional expertise combined with innovative approaches to ensure your project's success.`}
+                </p>
+              </div>
+
+              {/* Features and Process Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+                {/* Features */}
+                <div>
+                  <h3 className="text-2xl font-teko font-bold text-dark mb-8">What We Offer</h3>
+                  <ul className="space-y-4">
+                    {features.map((feature: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <CheckCircle className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 text-lg">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Process Steps */}
+                <div>
+                  <h3 className="text-2xl font-teko font-bold text-dark mb-8">Our Process</h3>
+                  <div className="space-y-4">
+                    {processSteps.map((step: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                          <span className="font-teko font-bold text-primary text-lg">{idx + 1}</span>
+                        </div>
+                        <div className="pt-1">
+                          <p className="text-gray-700 text-lg font-medium">{step}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Service Title */}
-              <h2 className="text-4xl font-teko font-bold text-dark mb-8 text-center">
-                {service.title}
-              </h2>
-
-              {/* Service Description */}
-              <div className="prose prose-lg max-w-none mb-12">
-                <p className="text-gray-700 leading-relaxed text-center mb-8">
-                  This is a detailed service page. You can add more content here such as:
+              {/* Additional Description */}
+              <div className="bg-gray-50 p-8 lg:p-12 rounded-lg mb-16">
+                <h3 className="text-2xl font-teko font-bold text-dark mb-4">Why Choose Us</h3>
+                <p className="text-gray-700 leading-relaxed text-lg mb-4">
+                  Our team of experts is dedicated to delivering high-quality solutions that exceed your expectations. We combine industry best practices with innovative approaches to ensure your project's success. With years of experience in the industry, we understand the unique challenges you face and provide tailored solutions.
                 </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                  <div className="bg-gray-50 p-8 rounded-lg">
-                    <h3 className="text-xl font-teko font-bold text-dark mb-4">What We Offer</h3>
-                    <ul className="text-gray-700 space-y-2">
-                      <li>✓ Professional expertise</li>
-                      <li>✓ Customized solutions</li>
-                      <li>✓ Timely delivery</li>
-                      <li>✓ 24/7 support</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-8 rounded-lg">
-                    <h3 className="text-xl font-teko font-bold text-dark mb-4">Our Process</h3>
-                    <ul className="text-gray-700 space-y-2">
-                      <li>1. Consultation & Planning</li>
-                      <li>2. Design & Development</li>
-                      <li>3. Testing & QA</li>
-                      <li>4. Launch & Support</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <p className="text-gray-700 leading-relaxed">
-                  Our team of experts is dedicated to delivering high-quality solutions that exceed your expectations.
-                  We combine industry best practices with innovative approaches to ensure your project's success.
+                <p className="text-gray-700 leading-relaxed text-lg">
+                  We pride ourselves on our commitment to excellence, timely delivery, and 24/7 support to ensure your complete satisfaction with our services.
                 </p>
               </div>
 
               {/* CTA Section */}
-              <div className="bg-primary text-white p-12 rounded-lg text-center mb-12">
-                <h3 className="text-2xl font-teko font-bold mb-4">Ready to Get Started?</h3>
-                <p className="mb-6">
-                  Let's discuss how this service can benefit your business.
+              <div className="bg-primary text-white p-12 rounded-lg text-center mb-16">
+                <h3 className="text-3xl font-teko font-bold mb-4">Ready to Get Started?</h3>
+                <p className="text-lg mb-8 text-white/90">
+                  Let's discuss how this service can benefit your business and help you achieve your goals.
                 </p>
                 <Link
                   href="/contact"
-                  className="inline-block bg-white text-primary px-8 py-3 font-teko font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors rounded-lg"
+                  className="inline-block bg-white text-primary px-8 py-3 font-teko font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors rounded-lg text-lg"
                 >
-                  Contact Us
+                  Get a Free Estimate
                 </Link>
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between pt-8 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-gray-200 gap-6">
                 <Link
                   href="/services"
-                  className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-semibold"
+                  className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-semibold text-lg"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   Back to Services
                 </Link>
-                <div className="flex gap-2">
-                  <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex gap-3">
+                  <Link
+                    href={`/services/${previousService.id}`}
+                    className="w-12 h-12 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 hover:border-primary transition-colors"
+                    title={`Previous: ${previousService.title}`}
+                  >
                     <ChevronLeft className="w-5 h-5 text-dark" />
-                  </button>
-                  <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
+                  </Link>
+                  <Link
+                    href={`/services/${nextService.id}`}
+                    className="w-12 h-12 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 hover:border-primary transition-colors"
+                    title={`Next: ${nextService.title}`}
+                  >
                     <ChevronRight className="w-5 h-5 text-dark" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
