@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 import { Award, Users, Briefcase, TrendingUp, Target, Zap } from 'lucide-react';
 
 const iconOptions = [
@@ -39,6 +40,9 @@ export default function StatsAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show stats
+      await revalidateHelpers.stats();
 
       setMessage('Stat successfully added!');
       setLabel('');

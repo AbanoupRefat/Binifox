@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 import { CheckCircle, Award, Target, Users, Zap, TrendingUp } from 'lucide-react';
 
 const iconOptions = [
@@ -39,6 +40,9 @@ export default function AboutAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show about features
+      await revalidateHelpers.about();
 
       setMessage('About feature successfully added!');
       setTitle('');

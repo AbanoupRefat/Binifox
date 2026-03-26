@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 import { Briefcase, Code, Palette, TrendingUp, Users, Zap, Target, Award } from 'lucide-react';
 
 const iconOptions = [
@@ -39,6 +40,9 @@ export default function ServicesAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show services
+      await revalidateHelpers.services();
 
       setMessage('Service successfully added!');
       setTitle('');

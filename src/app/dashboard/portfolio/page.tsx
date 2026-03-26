@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { uploadImage } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 
 export default function PortfolioAdmin() {
   const [title, setTitle] = useState('');
@@ -34,6 +35,9 @@ export default function PortfolioAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show portfolio
+      await revalidateHelpers.portfolio();
 
       setMessage('Project successfully added!');
       setTitle('');

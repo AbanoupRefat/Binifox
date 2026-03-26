@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { uploadImage } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 
 export default function NewsAdmin() {
   const [title, setTitle] = useState('');
@@ -35,6 +36,9 @@ export default function NewsAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show news
+      await revalidateHelpers.news();
 
       setMessage('News article successfully added!');
       setTitle('');

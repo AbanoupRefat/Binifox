@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { uploadImage } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 
 export default function TeamAdmin() {
   const [name, setName] = useState('');
@@ -40,6 +41,9 @@ export default function TeamAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show team members
+      await revalidateHelpers.team();
 
       setMessage('Team member successfully added!');
       setName('');

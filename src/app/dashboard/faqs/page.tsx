@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { revalidateHelpers } from '@/lib/revalidate';
 
 export default function FaqsAdmin() {
   const [question, setQuestion] = useState('');
@@ -27,6 +28,9 @@ export default function FaqsAdmin() {
         });
 
       if (error) throw error;
+
+      // Revalidate pages that show FAQs
+      await revalidateHelpers.faqs();
 
       setMessage('FAQ successfully added!');
       setQuestion('');
