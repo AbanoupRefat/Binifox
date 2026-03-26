@@ -14,11 +14,17 @@ type Project = Database['public']['Tables']['projects']['Row']
 type News = Database['public']['Tables']['news']['Row']
 type Service = Database['public']['Tables']['services']['Row']
 type SubService = Database['public']['Tables']['sub_services']['Row']
+type SubServiceMedia = Database['public']['Tables']['sub_service_media']['Row']
 type TeamMember = Database['public']['Tables']['team_members']['Row']
 type Faq = Database['public']['Tables']['faqs']['Row']
 type Stat = Database['public']['Tables']['stats']['Row']
 type AboutFeature = Database['public']['Tables']['about_features']['Row']
 type Pricing = Database['public']['Tables']['pricing']['Row']
+
+// Extended sub-service type with nested media
+type SubServiceWithMedia = SubService & {
+  sub_service_media: SubServiceMedia[]
+}
 
 // Extended service type with nested sub_services
 type ServiceWithSubServices = Service & {
@@ -326,5 +332,36 @@ export async function getSubServicesByServiceId(serviceId: string): Promise<SubS
   } catch (err) {
     console.error('Unexpected error fetching sub-services:', err);
     return [];
+  }
+}
+
+/**
+ * Fetch a single sub-service by ID with nested media
+ */
+export async function getSubServiceByIdWithMedia(id: string): Promise<SubServiceWithMedia | null> {
+  if (!isValidUUID(id)) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('sub_services')
+      .select('*, sub_service_media(*)')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching sub-service with media:', error.message);
+      return null;
+    }
+    
+    if (!data) return null;
+    
+    return {
+      ...data,
+      sub_service_media: (data.sub_service_media as SubServiceMedia[]) || []
+    } as SubServiceWithMedia;
+  } catch (err) {
+    console.error('Unexpected error fetching sub-service with media:', err);
+    return null;
   }
 }

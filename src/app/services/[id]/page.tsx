@@ -182,42 +182,41 @@ export default async function ServiceDetailPage({
                       const embedUrl = subService.gdrive_video_url ? getGDriveEmbedUrl(subService.gdrive_video_url) : null;
                       
                       return (
-                        <div key={subService.id || idx} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                        <Link 
+                          key={subService.id || idx} 
+                          href={`/services/${id}/${subService.id}`}
+                          className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                        >
                           {/* Sub-Service Image */}
                           {subService.image_url && (
-                            <div className="relative w-full h-48 overflow-hidden bg-gray-200">
+                            <div className="relative w-full h-56 overflow-hidden bg-gray-200">
                               <img
                                 src={subService.image_url}
                                 alt={subService.title}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               />
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <span className="bg-primary text-white px-4 py-2 rounded-lg font-teko font-bold uppercase tracking-wider text-lg">View Details</span>
+                              </div>
                             </div>
                           )}
 
-                          <div className="p-6">
+                          <div className="p-8">
                             {/* Sub-Service Title */}
-                            <h4 className="text-xl font-teko font-bold text-dark mb-3">{subService.title}</h4>
+                            <h4 className="text-2xl font-teko font-bold text-dark mb-4 group-hover:text-primary transition-colors">{subService.title}</h4>
 
                             {/* Sub-Service Description */}
                             {subService.description && (
-                              <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                              <p className="text-gray-700 text-base mb-6 leading-relaxed line-clamp-3">
                                 {subService.description}
                               </p>
                             )}
 
-                            {/* Google Drive Video */}
-                            {embedUrl && (
-                              <div className="mt-6 rounded-lg overflow-hidden shadow-md">
-                                <iframe
-                                  src={embedUrl}
-                                  className="w-full aspect-video rounded-lg"
-                                  allow="autoplay"
-                                  title={`${subService.title} Video`}
-                                />
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2 text-primary font-teko font-bold uppercase tracking-widest text-lg group-hover:gap-3 transition-all">
+                              Read More <ChevronRight className="w-5 h-5" />
+                            </div>
                           </div>
-                        </div>
+                        </Link>
                       );
                     })}
                   </div>

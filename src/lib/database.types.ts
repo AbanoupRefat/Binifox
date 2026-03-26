@@ -115,8 +115,22 @@ export interface Database {
           display_order: number
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['pricing']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['pricing']['Insert']>
+        Insert: Omit<Database["public"]["Tables"]["pricing"]["Row"], "id" | "created_at">
+        Update: Partial<Database["public"]["Tables"]["pricing"]["Insert"]>
+      }
+      sub_service_media: {
+        Row: {
+          id: string
+          sub_service_id: string
+          type: 'image' | 'video'
+          url: string
+          caption: string | null
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database["public"]["Tables"]["sub_service_media"]["Row"], "id" | "created_at" | "updated_at">
+        Update: Partial<Database["public"]["Tables"]["sub_service_media"]["Insert"]>
       }
     }
   }
