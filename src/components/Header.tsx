@@ -18,11 +18,11 @@ export default function Header() {
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "About", href: "/#about" },
-    { name: "Services", href: "/#services" },
-    { name: "Team", href: "/#team" },
-    { name: "News", href: "/#news" },
-    { name: "Contact", href: "/#contact" },
+    { name: "About", href: "/about" },
+    { name: "Services", href: "/services" },
+    { name: "Team", href: "/team" },
+    { name: "News", href: "/news" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -65,7 +65,7 @@ export default function Header() {
               <Search className="w-5 h-5" />
             </button>
             <Link
-              href="#contact"
+              href="/contact"
               className="bg-white text-dark px-6 py-3 font-teko text-sm font-semibold uppercase tracking-wider hover:bg-primary hover:text-white transition-all duration-300"
             >
               Contact
@@ -96,7 +96,7 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href="#contact"
+              href="/contact"
               className="inline-block mt-4 bg-primary text-white px-6 py-3 font-teko text-sm font-semibold uppercase tracking-wider"
               onClick={() => setIsMobileMenuOpen(false)}
             >

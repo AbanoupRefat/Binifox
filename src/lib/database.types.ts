@@ -83,6 +83,20 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['about_features']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['about_features']['Insert']>
       }
+      pricing: {
+        Row: {
+          id: string
+          name: string
+          price: number
+          description: string | null
+          features: string[]
+          is_popular: boolean
+          display_order: number
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['pricing']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['pricing']['Insert']>
+      }
     }
   }
 }

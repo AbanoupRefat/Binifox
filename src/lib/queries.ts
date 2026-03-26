@@ -9,6 +9,7 @@ type TeamMember = Database['public']['Tables']['team_members']['Row']
 type Faq = Database['public']['Tables']['faqs']['Row']
 type Stat = Database['public']['Tables']['stats']['Row']
 type AboutFeature = Database['public']['Tables']['about_features']['Row']
+type Pricing = Database['public']['Tables']['pricing']['Row']
 
 // Compatibility types for components
 type Article = {
@@ -132,4 +133,97 @@ export async function getAboutFeatures(): Promise<AboutFeature[]> {
       created_at: new Date().toISOString()
     }
   ]
+}
+
+/**
+ * Fetch all pricing plans ordered by display order
+ */
+export async function getPricing(): Promise<Pricing[]> {
+  const { data, error } = await supabase
+    .from('pricing')
+    .select('*')
+    .order('display_order', { ascending: true })
+  
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Fetch a single project by ID
+ */
+export async function getProjectById(id: string): Promise<ProjectCompat | null> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', id)
+    .single()
+  
+  if (error) {
+    console.error('Error fetching project:', error)
+    return null
+  }
+  
+  if (!data) return null
+  return { ...data, image: data.image_url }
+}
+
+/**
+ * Fetch a single article by ID
+ */
+export async function getArticleById(id: string): Promise<Article | null> {
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .eq('id', id)
+    .single()
+  
+  if (error) {
+    console.error('Error fetching article:', error)
+    return null
+  }
+  
+  if (!data) return null
+  return {
+    ...data,
+    image: data.image_url,
+    comments: data.comments_count,
+    date: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+}
+
+/**
+ * Fetch a single team member by ID
+ */
+export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | null> {
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('id', id)
+    .single()
+  
+  if (error) {
+    console.error('Error fetching team member:', error)
+    return null
+  }
+  
+  if (!data) return null
+  return { ...data, image: data.image_url }
+}
+
+/**
+ * Fetch a single service by ID
+ */
+export async function getServiceById(id: string): Promise<Service | null> {
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .eq('id', id)
+    .single()
+  
+  if (error) {
+    console.error('Error fetching service:', error)
+    return null
+  }
+  
+  return data || null
 }
