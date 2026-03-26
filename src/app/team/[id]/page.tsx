@@ -26,12 +26,13 @@ export async function generateStaticParams() {
 export default async function TeamMemberDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   let teamMember;
 
   try {
-    teamMember = await getTeamMemberById(params.id);
+    teamMember = await getTeamMemberById(id);
   } catch (error) {
     console.error("Error fetching team member:", error);
   }

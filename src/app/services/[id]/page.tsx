@@ -27,12 +27,13 @@ export async function generateStaticParams() {
 export default async function ServiceDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   let service;
 
   try {
-    service = await getServiceById(params.id);
+    service = await getServiceById(id);
   } catch (error) {
     console.error("Error fetching service:", error);
   }

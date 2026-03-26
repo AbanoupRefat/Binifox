@@ -26,12 +26,13 @@ export async function generateStaticParams() {
 export default async function PortfolioDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   let project;
 
   try {
-    project = await getProjectById(params.id);
+    project = await getProjectById(id);
   } catch (error) {
     console.error("Error fetching project:", error);
   }

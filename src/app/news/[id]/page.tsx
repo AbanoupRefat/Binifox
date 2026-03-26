@@ -26,12 +26,13 @@ export async function generateStaticParams() {
 export default async function NewsDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   let article;
 
   try {
-    article = await getArticleById(params.id);
+    article = await getArticleById(id);
   } catch (error) {
     console.error("Error fetching article:", error);
   }
