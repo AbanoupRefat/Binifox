@@ -31,7 +31,7 @@ export default async function Team() {
 
                   {/* Social Links Overlay */}
                   <div className="absolute inset-0 bg-primary/80 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {member.facebook_url && (
+                    {member.facebook_url && member.facebook_url !== '#' && (
                       <a
                         href={member.facebook_url}
                         className="w-10 h-10 bg-white text-dark flex items-center justify-center hover:bg-dark hover:text-white transition-all duration-300"
@@ -39,7 +39,7 @@ export default async function Team() {
                         <Facebook className="w-4 h-4" />
                       </a>
                     )}
-                    {member.twitter_url && (
+                    {member.twitter_url && member.twitter_url !== '#' && (
                       <a
                         href={member.twitter_url}
                         className="w-10 h-10 bg-white text-dark flex items-center justify-center hover:bg-dark hover:text-white transition-all duration-300"
@@ -47,7 +47,7 @@ export default async function Team() {
                         <Twitter className="w-4 h-4" />
                       </a>
                     )}
-                    {member.instagram_url && (
+                    {member.instagram_url && member.instagram_url !== '#' && (
                       <a
                         href={member.instagram_url}
                         className="w-10 h-10 bg-white text-dark flex items-center justify-center hover:bg-dark hover:text-white transition-all duration-300"
@@ -55,7 +55,7 @@ export default async function Team() {
                         <Instagram className="w-4 h-4" />
                       </a>
                     )}
-                    {member.linkedin_url && (
+                    {member.linkedin_url && member.linkedin_url !== '#' && (
                       <a
                         href={member.linkedin_url}
                         className="w-10 h-10 bg-white text-dark flex items-center justify-center hover:bg-dark hover:text-white transition-all duration-300"

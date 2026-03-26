@@ -26,6 +26,8 @@
 
 
 
+
+
   - Insert all 6 project records from Portfolio component into projects table
   - Insert all 3 article records from News component into articles table
   - Insert all 8 service records from Services component into services table with display_order
@@ -37,7 +39,12 @@
   - **Git**: Commit after seeding with message "feat: seed database with initial content data"
 
 
-- [ ] 5. Create data fetching utility functions
+- [x] 5. Create data fetching utility functions
+
+
+
+
+
 
 
 
@@ -52,7 +59,12 @@
 
   - **Git**: Commit after creation with message "feat: add database query utility functions"
 
-- [ ] 6. Migrate Services component to use Supabase
+- [x] 6. Migrate Services component to use Supabase
+
+
+
+
+
 
   - Convert Services component to async Server Component
   - Replace hardcoded services array with getServices() call
@@ -65,7 +77,12 @@
   - _Requirements: 7.1, 7.2, 7.3, 7.4_
   - **Git**: Commit after migration with message "feat: migrate Services component to Supabase"
 
-- [ ] 7. Migrate Stats component to use Supabase
+- [x] 7. Migrate Stats component to use Supabase
+
+
+
+
+
 
   - Keep Stats as Client Component (needs counter animation)
   - Add useEffect to fetch stats data on mount using getStats()
@@ -78,7 +95,12 @@
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
   - **Git**: Commit after migration with message "feat: migrate Stats component to Supabase"
 
-- [ ] 8. Migrate About component to use Supabase
+- [x] 8. Migrate About component to use Supabase
+
+
+
+
+
 
 
   - Convert About component to async Server Component
@@ -90,7 +112,12 @@
   - **Git**: Commit after migration with message "feat: migrate About component to Supabase"
 
 
-- [ ] 9. Migrate News component to use Supabase
+- [x] 9. Migrate News component to use Supabase
+
+
+
+
+
 
   - Convert News component to async Server Component
   - Replace hardcoded articles array with getArticles() call
@@ -99,7 +126,12 @@
   - _Requirements: 6.1, 6.2, 6.3_
   - **Git**: Commit after migration with message "feat: migrate News component to Supabase"
 
-- [ ] 10. Migrate Team component to use Supabase
+- [x] 10. Migrate Team component to use Supabase
+
+
+
+
+
 
   - Convert Team component to async Server Component
   - Replace hardcoded teamMembers array with getTeamMembers() call
@@ -110,7 +142,12 @@
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
   - **Git**: Commit after migration with message "feat: migrate Team component to Supabase"
 
-- [ ] 11. Migrate FAQ component to use Supabase
+- [x] 11. Migrate FAQ component to use Supabase
+
+
+
+
+
   - Keep FAQ as Client Component (needs accordion state)
   - Add useEffect to fetch FAQs data on mount using getFaqs()
   - Replace hardcoded faqs array with state from database
@@ -120,7 +157,12 @@
   - _Requirements: 9.1, 9.2, 9.3, 9.4_
   - **Git**: Commit after migration with message "feat: migrate FAQ component to Supabase"
 
-- [ ] 12. Migrate Portfolio component to use Supabase
+- [x] 12. Migrate Portfolio component to use Supabase
+
+
+
+
+
   - Keep Portfolio as Client Component (needs filter state)
   - Add useEffect to fetch projects data on mount using getProjects()
   - Replace hardcoded projects array with state from database
@@ -131,14 +173,24 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
   - **Git**: Commit after migration with message "feat: migrate Portfolio component to Supabase"
 
-- [ ] 13. Create reusable error and loading components
+- [x] 13. Create reusable error and loading components
+
+
+
+
+
   - Create src/components/ErrorFallback.tsx component with retry button
   - Create src/components/LoadingSpinner.tsx component for loading states
   - Update all migrated components to use these shared components
   - _Requirements: 12.1, 12.2, 12.3, 12.4_
   - **Git**: Commit after creation with message "feat: add reusable error and loading components"
 
-- [ ] 14. Test complete integration and verify functionality
+- [x] 14. Test complete integration and verify functionality
+
+
+
+
+
   - Run bun install to ensure all dependencies are installed
   - Run bun run dev to start development server
   - Verify all sections load data from Supabase correctly

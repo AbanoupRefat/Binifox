@@ -25,34 +25,34 @@ async function seedDatabase() {
   try {
     // 1. Seed Projects
     console.log('📦 Seeding projects...')
-    const projects = [
+    const projects: Database['public']['Tables']['projects']['Insert'][] = [
       {
-        image_url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80',
         title: 'Binifox Business',
         category: 'Business',
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
         title: 'Marketing Analysis',
         category: 'Design',
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80',
         title: 'Business Idea',
         category: 'Logo',
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80',
         title: 'Consultation',
         category: 'Agency',
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
         title: 'Digital Marketing',
         category: 'Business',
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&q=80',
         title: 'Super Experience',
         category: 'Design',
       },
@@ -60,68 +60,71 @@ async function seedDatabase() {
 
     const { error: projectsError } = await supabase
       .from('projects')
-      .insert(projects)
+      .insert(projects as any)
 
     if (projectsError) throw projectsError
     console.log(`✅ Inserted ${projects.length} projects\n`)
 
-    // 2. Seed News/Articles
-    console.log('📰 Seeding news articles...')
-    const news = [
+    // 2. Seed Articles
+    console.log('📰 Seeding articles...')
+    const articles: Database['public']['Tables']['articles']['Insert'][] = [
       {
-        image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80',
         title: 'Time is money but its not full demand.',
         author: 'Diboli',
-        comments_count: 23,
+        date: new Date().toISOString().split('T')[0],
+        comments: 23,
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
         title: 'We Are Trying To Do Best Work.',
         author: 'Diboli',
-        comments_count: 23,
+        date: new Date().toISOString().split('T')[0],
+        comments: 23,
       },
       {
-        image_url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&q=80',
         title: 'Nature is The best place for fresh mind.',
         author: 'Diboli',
-        comments_count: 23,
+        date: new Date().toISOString().split('T')[0],
+        comments: 23,
       },
     ]
 
-    const { error: newsError } = await supabase
-      .from('news')
-      .insert(news)
+    const { error: articlesError } = await supabase
+      .from('articles')
+      .insert(articles as any)
 
-    if (newsError) throw newsError
-    console.log(`✅ Inserted ${news.length} news articles\n`)
+    if (articlesError) throw articlesError
+    console.log(`✅ Inserted ${articles.length} articles\n`)
 
     // 3. Seed Services
     console.log('🛠️  Seeding services...')
-    const services = [
-      { icon_name: 'Monitor', title: 'Logo Design' },
-      { icon_name: 'Code', title: 'Web Design' },
-      { icon_name: 'Palette', title: 'UX/UI Design' },
-      { icon_name: 'Globe', title: 'Seo Marketing' },
-      { icon_name: 'Smartphone', title: 'App Development' },
-      { icon_name: 'PenTool', title: 'Content Writing' },
-      { icon_name: 'Layout', title: 'Modern Design' },
-      { icon_name: 'BarChart3', title: 'Resource Use' },
+    const services: Database['public']['Tables']['services']['Insert'][] = [
+      { icon_name: 'Monitor', title: 'Logo Design', display_order: 1 },
+      { icon_name: 'Code', title: 'Web Design', display_order: 2 },
+      { icon_name: 'Palette', title: 'UX/UI Design', display_order: 3 },
+      { icon_name: 'Globe', title: 'Seo Marketing', display_order: 4 },
+      { icon_name: 'Smartphone', title: 'App Development', display_order: 5 },
+      { icon_name: 'PenTool', title: 'Content Writing', display_order: 6 },
+      { icon_name: 'Layout', title: 'Modern Design', display_order: 7 },
+      { icon_name: 'BarChart3', title: 'Resource Use', display_order: 8 },
     ]
 
     const { error: servicesError } = await supabase
       .from('services')
-      .insert(services)
+      .insert(services as any)
 
     if (servicesError) throw servicesError
     console.log(`✅ Inserted ${services.length} services\n`)
 
     // 4. Seed Team Members
     console.log('👥 Seeding team members...')
-    const teamMembers = [
+    const teamMembers: Database['public']['Tables']['team_members']['Insert'][] = [
       {
         name: 'Philimia Darwin',
         role: 'Designer',
-        image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -130,7 +133,7 @@ async function seedDatabase() {
       {
         name: 'Hilixa Maria',
         role: 'Designer',
-        image_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -139,7 +142,7 @@ async function seedDatabase() {
       {
         name: 'Willamson Hilai',
         role: 'Designer',
-        image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -148,7 +151,7 @@ async function seedDatabase() {
       {
         name: 'Limonda Pwedie',
         role: 'Designer',
-        image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -158,7 +161,7 @@ async function seedDatabase() {
 
     const { error: teamError } = await supabase
       .from('team_members')
-      .insert(teamMembers)
+      .insert(teamMembers as any)
 
     if (teamError) throw teamError
     console.log(`✅ Inserted ${teamMembers.length} team members\n`)
@@ -190,23 +193,23 @@ async function seedDatabase() {
 
     const { error: faqsError } = await supabase
       .from('faqs')
-      .insert(faqs)
+      .insert(faqs as any)
 
     if (faqsError) throw faqsError
     console.log(`✅ Inserted ${faqs.length} FAQs\n`)
 
     // 6. Seed Stats
     console.log('📊 Seeding stats...')
-    const stats = [
-      { icon_name: 'Users', value: 4932, label: 'Expert Members' },
-      { icon_name: 'Smile', value: 1401, label: 'Satisfied Clients' },
-      { icon_name: 'Award', value: 8184, label: 'Problem Solve' },
-      { icon_name: 'Settings', value: 1385, label: 'Award Winner' },
+    const stats: Database['public']['Tables']['stats']['Insert'][] = [
+      { icon_name: 'Users', value: 4932, label: 'Expert Members', display_order: 1 },
+      { icon_name: 'Smile', value: 1401, label: 'Satisfied Clients', display_order: 2 },
+      { icon_name: 'Award', value: 8184, label: 'Problem Solve', display_order: 3 },
+      { icon_name: 'Settings', value: 1385, label: 'Award Winner', display_order: 4 },
     ]
 
     const { error: statsError } = await supabase
       .from('stats')
-      .insert(stats)
+      .insert(stats as any)
 
     if (statsError) throw statsError
     console.log(`✅ Inserted ${stats.length} stats\n`)

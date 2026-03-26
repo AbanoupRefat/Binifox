@@ -4,7 +4,7 @@ export interface Database {
       projects: {
         Row: {
           id: string
-          image: string
+          image_url: string
           title: string
           category: string
           created_at: string
@@ -12,25 +12,23 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['projects']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['projects']['Insert']>
       }
-      articles: {
+      news: {
         Row: {
           id: string
-          image: string
-          date: string
-          author: string
-          comments: number
+          image_url: string
           title: string
+          author: string
+          comments_count: number
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['articles']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['articles']['Insert']>
+        Insert: Omit<Database['public']['Tables']['news']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['news']['Insert']>
       }
       services: {
         Row: {
           id: string
           icon_name: string
           title: string
-          display_order: number
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['services']['Row'], 'id' | 'created_at'>
@@ -41,11 +39,11 @@ export interface Database {
           id: string
           name: string
           role: string
-          image: string
-          facebook_url: string | null
-          twitter_url: string | null
-          instagram_url: string | null
-          linkedin_url: string | null
+          image_url: string
+          facebook_url: string
+          twitter_url: string
+          instagram_url: string
+          linkedin_url: string
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['team_members']['Row'], 'id' | 'created_at'>
@@ -68,7 +66,6 @@ export interface Database {
           icon_name: string
           value: number
           label: string
-          display_order: number
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['stats']['Row'], 'id' | 'created_at'>
