@@ -152,42 +152,60 @@ export async function getPricing(): Promise<Pricing[]> {
  * Fetch a single project by ID
  */
 export async function getProjectById(id: string): Promise<ProjectCompat | null> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching project:', error)
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      // Silently handle "no rows found" error
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching project:', error.message)
+      return null
+    }
+    
+    if (!data) return null
+    return { ...data, image: data.image_url }
+  } catch (err) {
+    console.error('Unexpected error fetching project:', err)
     return null
   }
-  
-  if (!data) return null
-  return { ...data, image: data.image_url }
 }
 
 /**
  * Fetch a single article by ID
  */
 export async function getArticleById(id: string): Promise<Article | null> {
-  const { data, error } = await supabase
-    .from('news')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching article:', error)
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      // Silently handle "no rows found" error
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching article:', error.message)
+      return null
+    }
+    
+    if (!data) return null
+    return {
+      ...data,
+      image: data.image_url,
+      comments: data.comments_count,
+      date: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }
+  } catch (err) {
+    console.error('Unexpected error fetching article:', err)
     return null
-  }
-  
-  if (!data) return null
-  return {
-    ...data,
-    image: data.image_url,
-    comments: data.comments_count,
-    date: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 }
 
@@ -195,35 +213,53 @@ export async function getArticleById(id: string): Promise<Article | null> {
  * Fetch a single team member by ID
  */
 export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | null> {
-  const { data, error } = await supabase
-    .from('team_members')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching team member:', error)
+  try {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      // Silently handle "no rows found" error
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching team member:', error.message)
+      return null
+    }
+    
+    if (!data) return null
+    return { ...data, image: data.image_url }
+  } catch (err) {
+    console.error('Unexpected error fetching team member:', err)
     return null
   }
-  
-  if (!data) return null
-  return { ...data, image: data.image_url }
 }
 
 /**
  * Fetch a single service by ID
  */
 export async function getServiceById(id: string): Promise<Service | null> {
-  const { data, error } = await supabase
-    .from('services')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching service:', error)
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      // Silently handle "no rows found" error
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching service:', error.message)
+      return null
+    }
+    
+    return data || null
+  } catch (err) {
+    console.error('Unexpected error fetching service:', err)
     return null
   }
-  
-  return data || null
 }

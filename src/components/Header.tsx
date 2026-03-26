@@ -23,11 +23,7 @@ export default function Header() {
     {
       name: "Services",
       href: "/services",
-      hasDropdown: true,
-      dropdownItems: [
-        { name: "Services", href: "/services" },
-        { name: "Services Details", href: "/services/1" },
-      ],
+      hasDropdown: false,
     },
     {
       name: "Pages",
@@ -45,11 +41,7 @@ export default function Header() {
     {
       name: "News",
       href: "/news",
-      hasDropdown: true,
-      dropdownItems: [
-        { name: "News", href: "/news" },
-        { name: "Blog Details", href: "/news/1" },
-      ],
+      hasDropdown: false,
     },
     { name: "Contact", href: "/contact", hasDropdown: false },
   ];
