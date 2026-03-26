@@ -49,7 +49,7 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-dark shadow-lg py-2" : "bg-transparent py-4"
+        isScrolled ? "bg-dark shadow-lg py-2" : "bg-dark/60 backdrop-blur-sm py-4"
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -70,7 +70,7 @@ export default function Header() {
               <div key={item.name} className="relative group">
                 <Link
                   href={item.href}
-                  className="text-white font-rubik text-sm font-medium hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 py-2"
+                  className="text-white/90 font-rubik text-sm font-medium hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 py-2"
                 >
                   {item.name}
                 </Link>
