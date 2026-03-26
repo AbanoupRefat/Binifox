@@ -1,6 +1,14 @@
 import { supabase } from './supabase'
 import type { Database } from './database.types'
 
+/**
+ * Validates if a string is a valid UUID
+ */
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 // Type aliases for cleaner code
 type Project = Database['public']['Tables']['projects']['Row']
 type News = Database['public']['Tables']['news']['Row']
@@ -152,6 +160,8 @@ export async function getPricing(): Promise<Pricing[]> {
  * Fetch a single project by ID
  */
 export async function getProjectById(id: string): Promise<ProjectCompat | null> {
+  if (!isValidUUID(id)) return null;
+  
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -160,19 +170,15 @@ export async function getProjectById(id: string): Promise<ProjectCompat | null> 
       .single()
     
     if (error) {
-      // Silently handle "no rows found" error
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Error fetching project:', error.message)
-      return null
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching project:', error.message);
+      return null;
     }
     
-    if (!data) return null
-    return { ...data, image: data.image_url }
+    return data ? { ...data, image: data.image_url } : null;
   } catch (err) {
-    console.error('Unexpected error fetching project:', err)
-    return null
+    console.error('Unexpected error fetching project:', err);
+    return null;
   }
 }
 
@@ -180,6 +186,8 @@ export async function getProjectById(id: string): Promise<ProjectCompat | null> 
  * Fetch a single article by ID
  */
 export async function getArticleById(id: string): Promise<Article | null> {
+  if (!isValidUUID(id)) return null;
+
   try {
     const { data, error } = await supabase
       .from('news')
@@ -188,24 +196,21 @@ export async function getArticleById(id: string): Promise<Article | null> {
       .single()
     
     if (error) {
-      // Silently handle "no rows found" error
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Error fetching article:', error.message)
-      return null
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching article:', error.message);
+      return null;
     }
     
-    if (!data) return null
+    if (!data) return null;
     return {
       ...data,
       image: data.image_url,
       comments: data.comments_count,
       date: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    }
+    };
   } catch (err) {
-    console.error('Unexpected error fetching article:', err)
-    return null
+    console.error('Unexpected error fetching article:', err);
+    return null;
   }
 }
 
@@ -213,6 +218,8 @@ export async function getArticleById(id: string): Promise<Article | null> {
  * Fetch a single team member by ID
  */
 export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | null> {
+  if (!isValidUUID(id)) return null;
+
   try {
     const { data, error } = await supabase
       .from('team_members')
@@ -221,19 +228,15 @@ export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | 
       .single()
     
     if (error) {
-      // Silently handle "no rows found" error
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Error fetching team member:', error.message)
-      return null
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching team member:', error.message);
+      return null;
     }
     
-    if (!data) return null
-    return { ...data, image: data.image_url }
+    return data ? { ...data, image: data.image_url } : null;
   } catch (err) {
-    console.error('Unexpected error fetching team member:', err)
-    return null
+    console.error('Unexpected error fetching team member:', err);
+    return null;
   }
 }
 
@@ -241,6 +244,8 @@ export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | 
  * Fetch a single service by ID
  */
 export async function getServiceById(id: string): Promise<Service | null> {
+  if (!isValidUUID(id)) return null;
+
   try {
     const { data, error } = await supabase
       .from('services')
@@ -249,17 +254,14 @@ export async function getServiceById(id: string): Promise<Service | null> {
       .single()
     
     if (error) {
-      // Silently handle "no rows found" error
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Error fetching service:', error.message)
-      return null
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching service:', error.message);
+      return null;
     }
     
-    return data || null
+    return data || null;
   } catch (err) {
-    console.error('Unexpected error fetching service:', err)
-    return null
+    console.error('Unexpected error fetching service:', err);
+    return null;
   }
 }
