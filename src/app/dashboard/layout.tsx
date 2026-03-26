@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Image as ImageIcon, Users, Briefcase, TrendingUp, HelpCircle, Info, Newspaper, LogOut } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, Users, Briefcase, TrendingUp, HelpCircle, Newspaper, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -72,9 +72,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
           <Link href="/dashboard/faqs" className="flex items-center gap-3 hover:text-primary transition-colors py-2">
             <HelpCircle size={18} /> FAQs
-          </Link>
-          <Link href="/dashboard/about" className="flex items-center gap-3 hover:text-primary transition-colors py-2">
-            <Info size={18} /> About Features
           </Link>
           <Link href="/dashboard/news" className="flex items-center gap-3 hover:text-primary transition-colors py-2">
             <Newspaper size={18} /> News
