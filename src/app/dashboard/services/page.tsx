@@ -327,25 +327,6 @@ export default function ServicesAdmin() {
           )}
         </div>
 
-        {/* SQL Information */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Database Schema</h3>
-          <p className="text-sm text-blue-800 mb-3">The following SQL schema is used for the services table:</p>
-          <pre className="bg-white p-3 rounded border border-blue-200 text-xs overflow-x-auto text-gray-700">
-{`CREATE TABLE services (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title VARCHAR(255) NOT NULL,
-  icon_name VARCHAR(100),
-  short_description VARCHAR(150),
-  description TEXT,
-  image_url VARCHAR(500),
-  features TEXT[] (JSON array),
-  process_steps TEXT[] (JSON array),
-  created_at TIMESTAMP DEFAULT NOW()
-);`}
-          </pre>
-        </div>
-
         {/* Submit Button */}
         <button
           type="submit"
@@ -355,18 +336,6 @@ export default function ServicesAdmin() {
           {isSubmitting ? 'Saving...' : 'Save Service'}
         </button>
       </form>
-
-      {/* Supabase Connection Info */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h3 className="font-semibold text-dark mb-2">Supabase Setup Instructions</h3>
-        <ol className="text-sm text-gray-700 space-y-2 list-decimal list-inside">
-          <li>Go to your Supabase project dashboard</li>
-          <li>Navigate to SQL Editor</li>
-          <li>Run the SQL schema above to create/update the services table</li>
-          <li>Ensure Row Level Security (RLS) is configured appropriately</li>
-          <li>Test the connection using the form above</li>
-        </ol>
-      </div>
     </div>
   );
 }
