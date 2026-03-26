@@ -27,32 +27,32 @@ async function seedDatabase() {
     console.log('📦 Seeding projects...')
     const projects: Database['public']['Tables']['projects']['Insert'][] = [
       {
-        image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=600&q=80',
         title: 'Binifox Business',
         category: 'Business',
       },
       {
-        image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80',
         title: 'Marketing Analysis',
         category: 'Design',
       },
       {
-        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80',
         title: 'Business Idea',
         category: 'Logo',
       },
       {
-        image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80',
         title: 'Consultation',
         category: 'Agency',
       },
       {
-        image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
         title: 'Digital Marketing',
         category: 'Business',
       },
       {
-        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&q=80',
         title: 'Super Experience',
         category: 'Design',
       },
@@ -67,32 +67,29 @@ async function seedDatabase() {
 
     // 2. Seed Articles
     console.log('📰 Seeding articles...')
-    const articles: Database['public']['Tables']['articles']['Insert'][] = [
+    const articles: Database['public']['Tables']['news']['Insert'][] = [
       {
-        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80',
         title: 'Time is money but its not full demand.',
         author: 'Diboli',
-        date: new Date().toISOString().split('T')[0],
-        comments: 23,
+        comments_count: 23,
       },
       {
-        image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
         title: 'We Are Trying To Do Best Work.',
         author: 'Diboli',
-        date: new Date().toISOString().split('T')[0],
-        comments: 23,
+        comments_count: 23,
       },
       {
-        image: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&q=80',
+        image_url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&q=80',
         title: 'Nature is The best place for fresh mind.',
         author: 'Diboli',
-        date: new Date().toISOString().split('T')[0],
-        comments: 23,
+        comments_count: 23,
       },
     ]
 
     const { error: articlesError } = await supabase
-      .from('articles')
+      .from('news')
       .insert(articles as any)
 
     if (articlesError) throw articlesError
@@ -124,7 +121,7 @@ async function seedDatabase() {
       {
         name: 'Philimia Darwin',
         role: 'Designer',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+        image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -133,7 +130,7 @@ async function seedDatabase() {
       {
         name: 'Hilixa Maria',
         role: 'Designer',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+        image_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -142,7 +139,7 @@ async function seedDatabase() {
       {
         name: 'Willamson Hilai',
         role: 'Designer',
-        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+        image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
@@ -151,7 +148,7 @@ async function seedDatabase() {
       {
         name: 'Limonda Pwedie',
         role: 'Designer',
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
+        image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
         facebook_url: '#',
         twitter_url: '#',
         instagram_url: '#',
