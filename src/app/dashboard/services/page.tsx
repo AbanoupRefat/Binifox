@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { revalidateHelpers } from '@/lib/revalidate';
-import { Briefcase, Code, Palette, TrendingUp, Users, Zap, Target, Award, X, Edit2, Trash2, Plus, ChevronDown, Search } from 'lucide-react';
+import { uploadImage } from '@/lib/storage';
+import { Briefcase, Code, Palette, TrendingUp, Users, Zap, Target, Award, X, Edit2, Trash2, Plus, ChevronDown, Search, Upload } from 'lucide-react';
 
 const iconOptions = [
   { name: 'Briefcase', component: Briefcase },
@@ -16,6 +17,15 @@ const iconOptions = [
   { name: 'Award', component: Award },
 ];
 
+interface SubService {
+  id?: string;
+  title: string;
+  description: string;
+  image_url: string;
+  gdrive_video_url: string;
+  display_order?: number;
+}
+
 interface Service {
   id: string;
   title: string;
@@ -25,7 +35,9 @@ interface Service {
   image_url?: string;
   features?: string[];
   process_steps?: string[];
+  clients?: string[];
   created_at: string;
+  sub_services?: SubService[];
 }
 
 export default function ServicesAdmin() {
@@ -40,6 +52,8 @@ export default function ServicesAdmin() {
     description: false,
     features: false,
     process: false,
+    clients: false,
+    subServices: false,
   });
 
   // Form state
@@ -50,6 +64,9 @@ export default function ServicesAdmin() {
   const [iconName, setIconName] = useState('Briefcase');
   const [features, setFeatures] = useState<string[]>(['']);
   const [processSteps, setProcessSteps] = useState<string[]>(['']);
+  const [clients, setClients] = useState<string[]>(['']);
+  const [subServices, setSubServices] = useState<SubService[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   // Load services on mount
   useEffect(() => {
@@ -61,7 +78,7 @@ export default function ServicesAdmin() {
       setLoading(true);
       const { data, error } = await supabase
         .from('services')
-        .select('*')
+        .select('*, sub_services(*)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -82,6 +99,8 @@ export default function ServicesAdmin() {
     setIconName('Briefcase');
     setFeatures(['']);
     setProcessSteps(['']);
+    setClients(['']);
+    setSubServices([]);
     setEditingId(null);
     setShowAddForm(false);
   };
@@ -94,13 +113,15 @@ export default function ServicesAdmin() {
     setIconName(service.icon_name);
     setFeatures(Array.isArray(service.features) ? service.features : (service.features ? JSON.parse(service.features as any) : ['']));
     setProcessSteps(Array.isArray(service.process_steps) ? service.process_steps : (service.process_steps ? JSON.parse(service.process_steps as any) : ['']));
+    setClients(Array.isArray(service.clients) ? service.clients : (service.clients ? JSON.parse(service.clients as any) : ['']));
+    setSubServices(service.sub_services || []);
     setEditingId(service.id);
     setShowAddForm(true);
     setMessage('');
   };
 
   const handleDeleteService = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this service?')) return;
+    if (!confirm('Are you sure you want to delete this service? This will also delete all associated sub-services.')) return;
 
     try {
       const { error } = await supabase.from('services').delete().eq('id', id);
@@ -115,6 +136,33 @@ export default function ServicesAdmin() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isSubService: boolean = false, subServiceIndex?: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      const url = await uploadImage(file, 'services');
+      if (url) {
+        if (isSubService && subServiceIndex !== undefined) {
+          const newSubServices = [...subServices];
+          newSubServices[subServiceIndex].image_url = url;
+          setSubServices(newSubServices);
+        } else {
+          setImageUrl(url);
+        }
+        setMessage('Image uploaded successfully!');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setMessage('Error uploading image');
+      }
+    } catch (error: any) {
+      setMessage('Error: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) return;
@@ -122,6 +170,7 @@ export default function ServicesAdmin() {
     try {
       const filteredFeatures = features.filter(f => f.trim());
       const filteredSteps = processSteps.filter(s => s.trim());
+      const filteredClients = clients.filter(c => c.trim());
 
       const serviceData = {
         title,
@@ -131,7 +180,10 @@ export default function ServicesAdmin() {
         image_url: imageUrl || null,
         features: filteredFeatures.length > 0 ? filteredFeatures : null,
         process_steps: filteredSteps.length > 0 ? filteredSteps : null,
+        clients: filteredClients.length > 0 ? filteredClients : null,
       };
+
+      let serviceId = editingId;
 
       if (editingId) {
         // Update existing service
@@ -144,12 +196,45 @@ export default function ServicesAdmin() {
         setMessage('Service updated successfully!');
       } else {
         // Add new service
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('services')
-          .insert([serviceData]);
+          .insert([serviceData])
+          .select();
 
         if (error) throw error;
+        serviceId = data?.[0]?.id;
         setMessage('Service added successfully!');
+      }
+
+      // Handle sub-services
+      if (serviceId && subServices.length > 0) {
+        const subServicesToInsert = subServices
+          .filter(ss => ss.title.trim())
+          .map((ss, index) => ({
+            service_id: serviceId,
+            title: ss.title,
+            description: ss.description || null,
+            image_url: ss.image_url || null,
+            gdrive_video_url: ss.gdrive_video_url || null,
+            display_order: index,
+          }));
+
+        if (subServicesToInsert.length > 0) {
+          // Delete existing sub-services if updating
+          if (editingId) {
+            await supabase
+              .from('sub_services')
+              .delete()
+              .eq('service_id', serviceId);
+          }
+
+          // Insert new sub-services
+          const { error: subError } = await supabase
+            .from('sub_services')
+            .insert(subServicesToInsert);
+
+          if (subError) throw subError;
+        }
       }
 
       await revalidateHelpers.services();
@@ -187,6 +272,34 @@ export default function ServicesAdmin() {
 
   const handleRemoveProcessStep = (index: number) => {
     setProcessSteps(processSteps.filter((_, i) => i !== index));
+  };
+
+  const handleClientChange = (index: number, value: string) => {
+    const newClients = [...clients];
+    newClients[index] = value;
+    setClients(newClients);
+  };
+
+  const handleAddClient = () => {
+    setClients([...clients, '']);
+  };
+
+  const handleRemoveClient = (index: number) => {
+    setClients(clients.filter((_, i) => i !== index));
+  };
+
+  const handleSubServiceChange = (index: number, field: keyof SubService, value: string) => {
+    const newSubServices = [...subServices];
+    newSubServices[index] = { ...newSubServices[index], [field]: value };
+    setSubServices(newSubServices);
+  };
+
+  const handleAddSubService = () => {
+    setSubServices([...subServices, { title: '', description: '', image_url: '', gdrive_video_url: '' }]);
+  };
+
+  const handleRemoveSubService = (index: number) => {
+    setSubServices(subServices.filter((_, i) => i !== index));
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -301,24 +414,31 @@ export default function ServicesAdmin() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Service Image URL</label>
-                    <input
-                      type="url"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded focus:ring-primary focus:border-primary"
-                      placeholder="https://example.com/image.jpg"
-                    />
-                    {imageUrl && (
-                      <div className="mt-4">
-                        <img
-                          src={imageUrl}
-                          alt="Preview"
-                          className="max-w-xs h-auto rounded border border-gray-200"
-                          onError={() => setMessage('Error: Invalid image URL')}
-                        />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded cursor-pointer hover:border-primary transition-colors">
+                          <Upload size={20} className="text-gray-600" />
+                          <span className="text-sm text-gray-600">Upload Image</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e)}
+                            disabled={uploading}
+                            className="hidden"
+                          />
+                        </label>
                       </div>
-                    )}
+                      {imageUrl && (
+                        <div className="w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                          <img
+                            src={imageUrl}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -445,6 +565,154 @@ export default function ServicesAdmin() {
               )}
             </div>
 
+            {/* Clients Section */}
+            <div className="border border-gray-200 rounded-lg">
+              <button
+                type="button"
+                onClick={() => toggleSection('clients')}
+                className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-semibold text-dark">Associated Clients</h3>
+                <span className={`transform transition-transform ${expandedSections.clients ? 'rotate-180' : ''}`}>▼</span>
+              </button>
+
+              {expandedSections.clients && (
+                <div className="p-6 space-y-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-600">Add clients associated with this service</p>
+                  {clients.map((client, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={client}
+                        onChange={(e) => handleClientChange(index, e.target.value)}
+                        className="flex-1 p-3 border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                        placeholder={`Client ${index + 1}`}
+                      />
+                      {clients.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveClient(index)}
+                          className="px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddClient}
+                    className="px-4 py-2 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors font-medium text-sm"
+                  >
+                    + Add Client
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Sub-Services Section */}
+            <div className="border border-gray-200 rounded-lg">
+              <button
+                type="button"
+                onClick={() => toggleSection('subServices')}
+                className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-semibold text-dark">Sub-Services</h3>
+                <span className={`transform transition-transform ${expandedSections.subServices ? 'rotate-180' : ''}`}>▼</span>
+              </button>
+
+              {expandedSections.subServices && (
+                <div className="p-6 space-y-6 border-t border-gray-200">
+                  <p className="text-sm text-gray-600">Add sub-services with images and Google Drive videos</p>
+                  {subServices.map((subService, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-dark">Sub-Service {index + 1}</h4>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSubService(index)}
+                          className="px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                          <input
+                            type="text"
+                            value={subService.title}
+                            onChange={(e) => handleSubServiceChange(index, 'title', e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                            placeholder="e.g., Media Production"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                          <textarea
+                            value={subService.description}
+                            onChange={(e) => handleSubServiceChange(index, 'description', e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                            placeholder="Describe this sub-service..."
+                            rows={3}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                          <div className="flex gap-4">
+                            <div className="flex-1">
+                              <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded cursor-pointer hover:border-primary transition-colors">
+                                <Upload size={20} className="text-gray-600" />
+                                <span className="text-sm text-gray-600">Upload Image</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, true, index)}
+                                  disabled={uploading}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+                            {subService.image_url && (
+                              <div className="w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                                <img
+                                  src={subService.image_url}
+                                  alt="Preview"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Google Drive Video URL</label>
+                          <input
+                            type="url"
+                            value={subService.gdrive_video_url}
+                            onChange={(e) => handleSubServiceChange(index, 'gdrive_video_url', e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                            placeholder="https://drive.google.com/file/d/[VIDEO_ID]/view?usp=sharing"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Paste the Google Drive sharing link</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddSubService}
+                    className="px-4 py-2 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors font-medium text-sm"
+                  >
+                    + Add Sub-Service
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Submit Button */}
             <div className="flex gap-3">
               <button
@@ -500,7 +768,7 @@ export default function ServicesAdmin() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Icon</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Features</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Sub-Services</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -520,7 +788,7 @@ export default function ServicesAdmin() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-gray-600">
-                        {Array.isArray(service.features) ? service.features.length : 0} features
+                        {service.sub_services?.length || 0} sub-services
                       </span>
                     </td>
                     <td className="px-6 py-4">

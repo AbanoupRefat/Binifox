@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Services from "@/components/Services";
-import { getServiceById, getServices } from "@/lib/queries";
+import { getServiceByIdWithSubServices, getServices } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
+import { getGDriveEmbedUrl } from "@/lib/utils";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
@@ -34,7 +35,7 @@ export default async function ServiceDetailPage({
   let allServices: any[] = [];
 
   try {
-    service = await getServiceById(id);
+    service = await getServiceByIdWithSubServices(id);
     allServices = await getServices();
   } catch (error) {
     console.error("Error fetching service:", error);
@@ -75,6 +76,9 @@ export default async function ServiceDetailPage({
         "Testing & QA",
         "Launch & Support"
       ];
+
+  const clients = Array.isArray(service.clients) ? service.clients : [];
+  const subServices = service.sub_services || [];
 
   return (
     <>
@@ -151,6 +155,74 @@ export default async function ServiceDetailPage({
                   </div>
                 </div>
               </div>
+
+              {/* Clients Section */}
+              {clients.length > 0 && (
+                <div className="mb-16 bg-gray-50 p-8 lg:p-12 rounded-lg">
+                  <h3 className="text-2xl font-teko font-bold text-dark mb-8 text-center">Our Clients</h3>
+                  <div className="flex flex-wrap gap-4 justify-center">
+                    {clients.map((client: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="px-6 py-3 bg-white border-2 border-primary/20 rounded-lg hover:border-primary transition-colors"
+                      >
+                        <span className="text-gray-700 font-medium">{client}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Services Grid */}
+              {subServices.length > 0 && (
+                <div className="mb-16">
+                  <h3 className="text-3xl font-teko font-bold text-dark mb-12 text-center">Our Services</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {subServices.map((subService, idx) => {
+                      const embedUrl = subService.gdrive_video_url ? getGDriveEmbedUrl(subService.gdrive_video_url) : null;
+                      
+                      return (
+                        <div key={subService.id || idx} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                          {/* Sub-Service Image */}
+                          {subService.image_url && (
+                            <div className="relative w-full h-48 overflow-hidden bg-gray-200">
+                              <img
+                                src={subService.image_url}
+                                alt={subService.title}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
+                          )}
+
+                          <div className="p-6">
+                            {/* Sub-Service Title */}
+                            <h4 className="text-xl font-teko font-bold text-dark mb-3">{subService.title}</h4>
+
+                            {/* Sub-Service Description */}
+                            {subService.description && (
+                              <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                                {subService.description}
+                              </p>
+                            )}
+
+                            {/* Google Drive Video */}
+                            {embedUrl && (
+                              <div className="mt-6 rounded-lg overflow-hidden shadow-md">
+                                <iframe
+                                  src={embedUrl}
+                                  className="w-full aspect-video rounded-lg"
+                                  allow="autoplay"
+                                  title={`${subService.title} Video`}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Additional Description */}
               <div className="bg-gray-50 p-8 lg:p-12 rounded-lg mb-16">

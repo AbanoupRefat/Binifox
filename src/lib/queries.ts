@@ -13,11 +13,17 @@ const isValidUUID = (uuid: string) => {
 type Project = Database['public']['Tables']['projects']['Row']
 type News = Database['public']['Tables']['news']['Row']
 type Service = Database['public']['Tables']['services']['Row']
+type SubService = Database['public']['Tables']['sub_services']['Row']
 type TeamMember = Database['public']['Tables']['team_members']['Row']
 type Faq = Database['public']['Tables']['faqs']['Row']
 type Stat = Database['public']['Tables']['stats']['Row']
 type AboutFeature = Database['public']['Tables']['about_features']['Row']
 type Pricing = Database['public']['Tables']['pricing']['Row']
+
+// Extended service type with nested sub_services
+type ServiceWithSubServices = Service & {
+  sub_services: SubService[]
+}
 
 // Compatibility types for components
 type Article = {
@@ -241,7 +247,7 @@ export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | 
 }
 
 /**
- * Fetch a single service by ID
+ * Fetch a single service by ID without sub-services
  */
 export async function getServiceById(id: string): Promise<Service | null> {
   if (!isValidUUID(id)) return null;
@@ -263,5 +269,62 @@ export async function getServiceById(id: string): Promise<Service | null> {
   } catch (err) {
     console.error('Unexpected error fetching service:', err);
     return null;
+  }
+}
+
+/**
+ * Fetch a single service by ID with nested sub-services
+ */
+export async function getServiceByIdWithSubServices(id: string): Promise<ServiceWithSubServices | null> {
+  if (!isValidUUID(id)) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*, sub_services(*)')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching service with sub-services:', error.message);
+      return null;
+    }
+    
+    if (!data) return null;
+    
+    // Ensure sub_services is always an array
+    return {
+      ...data,
+      sub_services: (data.sub_services as SubService[]) || []
+    } as ServiceWithSubServices;
+  } catch (err) {
+    console.error('Unexpected error fetching service with sub-services:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch all sub-services for a given service ID
+ */
+export async function getSubServicesByServiceId(serviceId: string): Promise<SubService[]> {
+  if (!isValidUUID(serviceId)) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('sub_services')
+      .select('*')
+      .eq('service_id', serviceId)
+      .order('display_order', { ascending: true })
+    
+    if (error) {
+      console.error('Error fetching sub-services:', error.message);
+      return [];
+    }
+    
+    return data || [];
+  } catch (err) {
+    console.error('Unexpected error fetching sub-services:', err);
+    return [];
   }
 }

@@ -34,10 +34,26 @@ export interface Database {
           image_url: string | null
           features: string[] | null
           process_steps: string[] | null
+          clients: string[] | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['services']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['services']['Insert']>
+      }
+      sub_services: {
+        Row: {
+          id: string
+          service_id: string
+          title: string
+          description: string | null
+          image_url: string | null
+          gdrive_video_url: string | null
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['sub_services']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['sub_services']['Insert']>
       }
       team_members: {
         Row: {
