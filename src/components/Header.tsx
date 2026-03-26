@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Search, ChevronDown } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,12 +18,40 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Services", href: "/services" },
-    { name: "Team", href: "/team" },
-    { name: "News", href: "/news" },
-    { name: "Contact", href: "/contact" },
+    { name: "Home", href: "/", hasDropdown: false },
+    { name: "About", href: "/about", hasDropdown: false },
+    {
+      name: "Services",
+      href: "/services",
+      hasDropdown: true,
+      dropdownItems: [
+        { name: "Services", href: "/services" },
+        { name: "Services Details", href: "/services/1" },
+      ],
+    },
+    {
+      name: "Pages",
+      href: "#",
+      hasDropdown: true,
+      dropdownItems: [
+        { name: "About", href: "/about" },
+        { name: "Pricing", href: "/pricing" },
+        { name: "Portfolio", href: "/portfolio" },
+        { name: "Team", href: "/team" },
+        { name: "FAQ", href: "/faq" },
+        { name: "Contact", href: "/contact" },
+      ],
+    },
+    {
+      name: "News",
+      href: "/news",
+      hasDropdown: true,
+      dropdownItems: [
+        { name: "News", href: "/news" },
+        { name: "Blog Details", href: "/news/1" },
+      ],
+    },
+    { name: "Contact", href: "/contact", hasDropdown: false },
   ];
 
   return (
@@ -46,16 +75,29 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-white font-rubik text-sm font-medium hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1"
-              >
-                {item.name}
-                {(item.name === "Home" || item.name === "Services" || item.name === "Pages" || item.name === "News") && (
-                  <ChevronDown className="w-3 h-3" />
+              <div key={item.name} className="relative group">
+                <Link
+                  href={item.href}
+                  className="text-white font-rubik text-sm font-medium hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 py-2"
+                >
+                  {item.name}
+                </Link>
+
+                {/* Dropdown Menu */}
+                {item.hasDropdown && item.dropdownItems && (
+                  <div className="absolute left-0 mt-0 w-48 bg-white text-dark rounded-none shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border-t-4 border-primary">
+                    {item.dropdownItems.map((dropdownItem, index) => (
+                      <Link
+                        key={index}
+                        href={dropdownItem.href}
+                        className="block px-6 py-3 text-sm font-rubik uppercase tracking-wider hover:bg-gray-100 hover:text-primary transition-colors first:rounded-t-none last:rounded-b-none"
+                      >
+                        {dropdownItem.name}
+                      </Link>
+                    ))}
+                  </div>
                 )}
-              </Link>
+              </div>
             ))}
           </nav>
 
@@ -86,14 +128,53 @@ export default function Header() {
         {isMobileMenuOpen && (
           <nav className="lg:hidden mt-4 pb-4 border-t border-white/10">
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block py-3 text-white font-rubik text-sm font-medium hover:text-primary transition-colors uppercase tracking-wider"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
+              <div key={item.name}>
+                <div
+                  className="flex items-center justify-between py-3 text-white font-rubik text-sm font-medium uppercase tracking-wider"
+                  onClick={() =>
+                    item.hasDropdown
+                      ? setOpenDropdown(
+                          openDropdown === item.name ? null : item.name
+                        )
+                      : null
+                  }
+                >
+                  <Link
+                    href={item.href}
+                    className="hover:text-primary transition-colors flex-1"
+                    onClick={() => !item.hasDropdown && setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                  {item.hasDropdown && (
+                    <span
+                      className={`text-primary transition-transform ${
+                        openDropdown === item.name ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  )}
+                </div>
+
+                {/* Mobile Dropdown */}
+                {item.hasDropdown &&
+                  item.dropdownItems &&
+                  openDropdown === item.name && (
+                    <div className="bg-white/10 border-l-2 border-primary">
+                      {item.dropdownItems.map((dropdownItem, index) => (
+                        <Link
+                          key={index}
+                          href={dropdownItem.href}
+                          className="block py-2 pl-6 text-white font-rubik text-xs uppercase tracking-wider hover:text-primary transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {dropdownItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+              </div>
             ))}
             <Link
               href="/contact"
