@@ -28,11 +28,7 @@ export default function PortfolioAdmin() {
       // 2. Save the text data + image URL to PostgreSQL
       const { error } = await supabase
         .from('projects')
-        .insert({
-          title,
-          category,
-          image_url: imageUrl
-        });
+        .insert({ title, category, image_url: imageUrl } as any);
 
       if (error) throw error;
 

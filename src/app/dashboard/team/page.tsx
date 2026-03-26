@@ -31,14 +31,12 @@ export default function TeamAdmin() {
       const { error } = await supabase
         .from('team_members')
         .insert({
-          name,
-          role,
-          image_url: imageUrl,
+          name, role, image_url: imageUrl,
           facebook_url: facebookUrl || '#',
           twitter_url: twitterUrl || '#',
           instagram_url: instagramUrl || '#',
           linkedin_url: linkedinUrl || '#'
-        });
+        } as any);
 
       if (error) throw error;
 

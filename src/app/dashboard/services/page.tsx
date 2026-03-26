@@ -33,11 +33,7 @@ export default function ServicesAdmin() {
     try {
       const { error } = await supabase
         .from('services')
-        .insert({
-          title,
-          icon_name: iconName,
-          display_order: parseInt(displayOrder)
-        });
+        .insert({ title, icon_name: iconName, display_order: parseInt(displayOrder) } as any);
 
       if (error) throw error;
 

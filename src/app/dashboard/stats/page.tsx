@@ -32,12 +32,7 @@ export default function StatsAdmin() {
     try {
       const { error } = await supabase
         .from('stats')
-        .insert({
-          label,
-          value: parseInt(value),
-          icon_name: iconName,
-          display_order: parseInt(displayOrder)
-        });
+        .insert({ label, value: parseInt(value), icon_name: iconName, display_order: parseInt(displayOrder) } as any);
 
       if (error) throw error;
 

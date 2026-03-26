@@ -21,11 +21,7 @@ export default function FaqsAdmin() {
     try {
       const { error } = await supabase
         .from('faqs')
-        .insert({
-          question,
-          answer,
-          display_order: parseInt(displayOrder)
-        });
+        .insert({ question, answer, display_order: parseInt(displayOrder) } as any);
 
       if (error) throw error;
 

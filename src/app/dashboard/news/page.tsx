@@ -28,12 +28,7 @@ export default function NewsAdmin() {
 
       const { error } = await supabase
         .from('news')
-        .insert({
-          title,
-          author,
-          comments_count: parseInt(comments),
-          image_url: imageUrl
-        });
+        .insert({ title, author, comments_count: parseInt(comments), image_url: imageUrl } as any);
 
       if (error) throw error;
 
