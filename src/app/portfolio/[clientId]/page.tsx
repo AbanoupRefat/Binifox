@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, getPortfolioClients, getIcon } from "@/lib/queries";
+import { getPortfolioClientById, getPortfolioClients, type PortfolioClientWithServices } from "@/lib/queries";
+import { getIcon } from "@/lib/iconMap";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, Facebook, Instagram, Send, ArrowRight } from "lucide-react";
@@ -28,7 +29,7 @@ export default async function ClientPortfolioPage({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
-  let client;
+  let client: PortfolioClientWithServices | null = null;
 
   try {
     client = await getPortfolioClientById(clientId);
