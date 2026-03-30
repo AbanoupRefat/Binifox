@@ -1,33 +1,56 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, getSubServiceByIdWithMedia, getPortfolioProofMedia, type PortfolioProofMedia } from "@/lib/queries";
+import { getPortfolioClientById, getSubServiceByIdWithMedia, getPortfolioProofMedia, type PortfolioProofMedia, type PortfolioClientWithServices, type SubServiceWithMedia } from "@/lib/queries";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, Image as ImageIcon } from "lucide-react";
 
-export const metadata = {
-  title: "Proof of Concept Gallery - Binifox",
-  description: "View the proof of concept and gallery of work done for this client sub-service.",
-};
+export default function ProofOfConceptGalleryPage() {
+  const params = useParams();
+  const clientId = params?.clientId as string;
+  const serviceId = params?.serviceId as string;
+  const subServiceId = params?.subServiceId as string;
+  
+  const [client, setClient] = useState<PortfolioClientWithServices | null>(null);
+  const [subService, setSubService] = useState<SubServiceWithMedia | null>(null);
+  const [proofMedia, setProofMedia] = useState<PortfolioProofMedia[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export const revalidate = 60;
+  useEffect(() => {
+    if (!clientId || !subServiceId) {
+      setLoading(false);
+      return;
+    }
 
-export default async function ProofOfConceptGalleryPage({
-  params,
-}: {
-  params: Promise<{ clientId: string; serviceId: string; subServiceId: string }>;
-}) {
-  const { clientId, serviceId, subServiceId } = await params;
-  let client;
-  let subService;
-  let proofMedia: PortfolioProofMedia[] = [];
+    Promise.all([
+      getPortfolioClientById(clientId),
+      getSubServiceByIdWithMedia(subServiceId),
+      getPortfolioProofMedia(clientId, subServiceId)
+    ])
+      .then(([clientData, subServiceData, proofMediaData]) => {
+        setClient(clientData);
+        setSubService(subServiceData);
+        setProofMedia(proofMediaData);
+      })
+      .catch((error) => console.error("Error fetching gallery details:", error))
+      .finally(() => setLoading(false));
+  }, [clientId, subServiceId]);
 
-  try {
-    client = await getPortfolioClientById(clientId);
-    subService = await getSubServiceByIdWithMedia(subServiceId);
-    proofMedia = await getPortfolioProofMedia(clientId, subServiceId);
-  } catch (error) {
-    console.error("Error fetching gallery details:", error);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   if (!client || !subService) {

@@ -1,32 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, getServiceByIdWithSubServices } from "@/lib/queries";
+import { getPortfolioClientById, getServiceByIdWithSubServices, type PortfolioClientWithServices, type ServiceWithSubServices } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 
-export const metadata = {
-  title: "Service Portfolio - Binifox",
-  description: "Explore the sub-services and proof of concept for this client service.",
-};
+export default function ServicePortfolioPage() {
+  const params = useParams();
+  const clientId = params?.clientId as string;
+  const serviceId = params?.serviceId as string;
+  
+  const [client, setClient] = useState<PortfolioClientWithServices | null>(null);
+  const [service, setService] = useState<ServiceWithSubServices | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const revalidate = 60;
+  useEffect(() => {
+    if (!clientId || !serviceId) {
+      setLoading(false);
+      return;
+    }
 
-export default async function ServicePortfolioPage({
-  params,
-}: {
-  params: Promise<{ clientId: string; serviceId: string }>;
-}) {
-  const { clientId, serviceId } = await params;
-  let client;
-  let service;
+    Promise.all([
+      getPortfolioClientById(clientId),
+      getServiceByIdWithSubServices(serviceId)
+    ])
+      .then(([clientData, serviceData]) => {
+        setClient(clientData);
+        setService(serviceData);
+      })
+      .catch((error) => console.error("Error fetching service portfolio details:", error))
+      .finally(() => setLoading(false));
+  }, [clientId, serviceId]);
 
-  try {
-    client = await getPortfolioClientById(clientId);
-    service = await getServiceByIdWithSubServices(serviceId);
-  } catch (error) {
-    console.error("Error fetching service portfolio details:", error);
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   if (!client || !service) {

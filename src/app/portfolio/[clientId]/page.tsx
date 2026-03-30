@@ -1,42 +1,43 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, getPortfolioClients, type PortfolioClientWithServices } from "@/lib/queries";
+import { getPortfolioClientById, type PortfolioClientWithServices } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, Facebook, Instagram, Send, ArrowRight } from "lucide-react";
 
-export const metadata = {
-  title: "Client Portfolio - Binifox",
-  description: "Explore the services we've provided for this client.",
-};
+export default function ClientPortfolioPage() {
+  const params = useParams();
+  const clientId = params?.clientId as string;
+  const [client, setClient] = useState<PortfolioClientWithServices | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const revalidate = 60;
+  useEffect(() => {
+    if (!clientId) {
+      setLoading(false);
+      return;
+    }
+    
+    getPortfolioClientById(clientId)
+      .then(setClient)
+      .catch((error) => console.error("Error fetching client details:", error))
+      .finally(() => setLoading(false));
+  }, [clientId]);
 
-export async function generateStaticParams() {
-  try {
-    const clients = await getPortfolioClients();
-    return clients.map((client) => ({
-      clientId: client.id,
-    }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
-  }
-}
-
-export default async function ClientPortfolioPage({
-  params,
-}: {
-  params: Promise<{ clientId: string }>;
-}) {
-  const { clientId } = await params;
-  let client: PortfolioClientWithServices | null = null;
-
-  try {
-    client = await getPortfolioClientById(clientId);
-  } catch (error) {
-    console.error("Error fetching client details:", error);
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   if (!client) {

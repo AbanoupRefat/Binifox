@@ -1,25 +1,29 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CTA from "@/components/CTA";
 import { getPortfolioClients, type PortfolioClient } from "@/lib/queries";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
-export const metadata = {
-  title: "Companies Portfolio - Binifox",
-  description: "Explore our work with various clients and companies.",
-};
+export default function PortfolioPage() {
+  const [clients, setClients] = useState<PortfolioClient[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export const revalidate = 60;
-
-export default async function PortfolioPage() {
-  let clients: PortfolioClient[] = [];
-  try {
-    clients = await getPortfolioClients();
-  } catch (error) {
-    console.error("Error fetching portfolio clients:", error);
-  }
+  useEffect(() => {
+    getPortfolioClients()
+      .then((data) => {
+        setClients(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching portfolio clients:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <>
@@ -38,9 +42,13 @@ export default async function PortfolioPage() {
         </section>
 
         {/* Clients Grid */}
-        <section className="py-20 lg:py-28 bg-white">
+        <section className="py-20 lg:py-28 bg-white min-h-[50vh]">
           <div className="container mx-auto px-4 lg:px-8">
-            {clients.length > 0 ? (
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+              </div>
+            ) : clients.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {clients.map((client) => (
                   <Link 
@@ -57,7 +65,7 @@ export default async function PortfolioPage() {
                           className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="text-4xl font-teko font-bold text-primary uppercase">{client.name}</div>
+                        <div className="text-4xl font-teko font-bold text-primary uppercase text-center">{client.name}</div>
                       )}
                       <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300" />
                     </div>
