@@ -1,8 +1,22 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+/**
+ * Converts a Google Drive share URL to an embeddable preview URL.
+ * Handles formats:
+ *   https://drive.google.com/file/d/[ID]/view?usp=sharing
+ *   https://drive.google.com/open?id=[ID]
+ *   https://drive.google.com/uc?id=[ID]
+ */
+export function getGDriveEmbedUrl(url: string): string | null {
+  if (!url) return null;
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  // Format: /file/d/[ID]/
+  const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
+
+  // Format: ?id=[ID] or &id=[ID]
+  const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (idMatch) return `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+
+  return null;
 }
 
 /**

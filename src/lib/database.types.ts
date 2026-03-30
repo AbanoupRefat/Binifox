@@ -32,9 +32,9 @@ export interface Database {
           description: string | null
           short_description: string | null
           image_url: string | null
+          clients: string[] | null
           features: string[] | null
           process_steps: string[] | null
-          clients: string[] | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['services']['Row'], 'id' | 'created_at'>
@@ -48,11 +48,9 @@ export interface Database {
           description: string | null
           image_url: string | null
           gdrive_video_url: string | null
-          display_order: number
           created_at: string
-          updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['sub_services']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: Omit<Database['public']['Tables']['sub_services']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['sub_services']['Insert']>
       }
       team_members: {
@@ -115,66 +113,8 @@ export interface Database {
           display_order: number
           created_at: string
         }
-        Insert: Omit<Database["public"]["Tables"]["pricing"]["Row"], "id" | "created_at">
-        Update: Partial<Database["public"]["Tables"]["pricing"]["Insert"]>
-      }
-      sub_service_media: {
-        Row: {
-          id: string
-          sub_service_id: string
-          type: 'image' | 'video'
-          url: string
-          caption: string | null
-          display_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: Omit<Database["public"]["Tables"]["sub_service_media"]["Row"], "id" | "created_at" | "updated_at">
-        Update: Partial<Database["public"]["Tables"]["sub_service_media"]["Insert"]>
-      }
-      portfolio_clients: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          vision_mission: string | null
-          logo_url: string | null
-          category: string | null
-          facebook_url: string | null
-          instagram_url: string | null
-          snapchat_url: string | null
-          join_date: string | null
-          display_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: Omit<Database["public"]["Tables"]["portfolio_clients"]["Row"], "id" | "created_at" | "updated_at">
-        Update: Partial<Database["public"]["Tables"]["portfolio_clients"]["Insert"]>
-      }
-      portfolio_client_services: {
-        Row: {
-          id: string
-          client_id: string
-          service_id: string
-          display_order: number
-          created_at: string
-        }
-        Insert: Omit<Database["public"]["Tables"]["portfolio_client_services"]["Row"], "id" | "created_at">
-        Update: Partial<Database["public"]["Tables"]["portfolio_client_services"]["Insert"]>
-      }
-      portfolio_proof_media: {
-        Row: {
-          id: string
-          client_id: string
-          sub_service_id: string
-          url: string
-          caption: string | null
-          display_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: Omit<Database["public"]["Tables"]["portfolio_proof_media"]["Row"], "id" | "created_at" | "updated_at">
-        Update: Partial<Database["public"]["Tables"]["portfolio_proof_media"]["Insert"]>
+        Insert: Omit<Database['public']['Tables']['pricing']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['pricing']['Insert']>
       }
     }
   }

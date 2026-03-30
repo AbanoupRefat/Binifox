@@ -13,33 +13,11 @@ const isValidUUID = (uuid: string) => {
 type Project = Database['public']['Tables']['projects']['Row']
 type News = Database['public']['Tables']['news']['Row']
 type Service = Database['public']['Tables']['services']['Row']
-type SubService = Database['public']['Tables']['sub_services']['Row']
-type SubServiceMedia = Database['public']['Tables']['sub_service_media']['Row']
 type TeamMember = Database['public']['Tables']['team_members']['Row']
 type Faq = Database['public']['Tables']['faqs']['Row']
 type Stat = Database['public']['Tables']['stats']['Row']
 type AboutFeature = Database['public']['Tables']['about_features']['Row']
 type Pricing = Database['public']['Tables']['pricing']['Row']
-
-// Portfolio Types
-type PortfolioClient = Database['public']['Tables']['portfolio_clients']['Row']
-type PortfolioClientService = Database['public']['Tables']['portfolio_client_services']['Row']
-type PortfolioProofMedia = Database['public']['Tables']['portfolio_proof_media']['Row']
-
-// Extended sub-service type with nested media
-type SubServiceWithMedia = SubService & {
-  sub_service_media: SubServiceMedia[]
-}
-
-// Extended service type with nested sub_services
-type ServiceWithSubServices = Service & {
-  sub_services: SubService[]
-}
-
-// Portfolio Extended Types
-type PortfolioClientWithServices = PortfolioClient & {
-  services: Service[]
-}
 
 // Compatibility types for components
 type Article = {
@@ -263,7 +241,32 @@ export async function getTeamMemberById(id: string): Promise<TeamMemberCompat | 
 }
 
 /**
- * Fetch a single service by ID without sub-services
+ * Fetch a single service by ID with nested sub_services
+ */
+export type ServiceWithSubs = Database['public']['Tables']['services']['Row'] & {
+  sub_services: Database['public']['Tables']['sub_services']['Row'][]
+}
+
+export async function getServiceWithSubServices(id: string): Promise<ServiceWithSubs | null> {
+  if (!isValidUUID(id)) return null;
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*, sub_services(*)')
+      .eq('id', id)
+      .single()
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      return null;
+    }
+    return data as unknown as ServiceWithSubs;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch a single service by ID
  */
 export async function getServiceById(id: string): Promise<Service | null> {
   if (!isValidUUID(id)) return null;
@@ -285,175 +288,5 @@ export async function getServiceById(id: string): Promise<Service | null> {
   } catch (err) {
     console.error('Unexpected error fetching service:', err);
     return null;
-  }
-}
-
-/**
- * Fetch a single service by ID with nested sub-services
- */
-export async function getServiceByIdWithSubServices(id: string): Promise<ServiceWithSubServices | null> {
-  if (!isValidUUID(id)) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('services')
-      .select('*, sub_services(*)')
-      .eq('id', id)
-      .single()
-    
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('Error fetching service with sub-services:', error.message);
-      return null;
-    }
-    
-    if (!data) return null;
-    
-    // Ensure sub_services is always an array
-    return {
-      ...data,
-      sub_services: (data.sub_services as SubService[]) || []
-    } as ServiceWithSubServices;
-  } catch (err) {
-    console.error('Unexpected error fetching service with sub-services:', err);
-    return null;
-  }
-}
-
-/**
- * Fetch all sub-services for a given service ID
- */
-export async function getSubServicesByServiceId(serviceId: string): Promise<SubService[]> {
-  if (!isValidUUID(serviceId)) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from('sub_services')
-      .select('*')
-      .eq('service_id', serviceId)
-      .order('display_order', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching sub-services:', error.message);
-      return [];
-    }
-    
-    return data || [];
-  } catch (err) {
-    console.error('Unexpected error fetching sub-services:', err);
-    return [];
-  }
-}
-
-/**
- * Fetch a single sub-service by ID with nested media
- */
-export async function getSubServiceByIdWithMedia(id: string): Promise<SubServiceWithMedia | null> {
-  if (!isValidUUID(id)) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('sub_services')
-      .select('*, sub_service_media(*)')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('Error fetching sub-service with media:', error.message);
-      return null;
-    }
-    
-    if (!data) return null;
-    
-    return {
-      ...data,
-      sub_service_media: (data.sub_service_media as SubServiceMedia[]) || []
-    } as SubServiceWithMedia;
-  } catch (err) {
-    console.error('Unexpected error fetching sub-service with media:', err);
-    return null;
-  }
-}
-
-// --- Portfolio Queries ---
-
-/**
- * Fetch all portfolio clients
- */
-export async function getPortfolioClients(): Promise<PortfolioClient[]> {
-  const { data, error } = await supabase
-    .from('portfolio_clients')
-    .select('*')
-    .order('display_order', { ascending: true })
-  
-  if (error) throw error
-  return data || []
-}
-
-/**
- * Fetch a single portfolio client by ID with their linked services
- */
-export async function getPortfolioClientById(id: string): Promise<PortfolioClientWithServices | null> {
-  if (!isValidUUID(id)) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('portfolio_clients')
-      .select(`
-        *,
-        portfolio_client_services(
-          service:services(*)
-        )
-      `)
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('Error fetching portfolio client:', error.message);
-      return null;
-    }
-    
-    if (!data) return null;
-    
-    // Transform junction data into a clean array of services
-    const services = (data.portfolio_client_services as any[])
-      ?.map(pcs => pcs.service)
-      .filter(Boolean) || [];
-      
-    return {
-      ...data,
-      services
-    } as PortfolioClientWithServices;
-  } catch (err) {
-    console.error('Unexpected error fetching portfolio client:', err);
-    return null;
-  }
-}
-
-/**
- * Fetch proof media for a specific client and sub-service
- */
-export async function getPortfolioProofMedia(clientId: string, subServiceId: string): Promise<PortfolioProofMedia[]> {
-  if (!isValidUUID(clientId) || !isValidUUID(subServiceId)) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from('portfolio_proof_media')
-      .select('*')
-      .eq('client_id', clientId)
-      .eq('sub_service_id', subServiceId)
-      .order('display_order', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching proof media:', error.message);
-      return [];
-    }
-    
-    return data || [];
-  } catch (err) {
-    console.error('Unexpected error fetching proof media:', err);
-    return [];
   }
 }
