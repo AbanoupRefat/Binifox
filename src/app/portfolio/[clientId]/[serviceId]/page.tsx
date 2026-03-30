@@ -11,6 +11,8 @@ export const metadata = {
   description: "Explore the sub-services and proof of concept for this client service.",
 };
 
+export const revalidate = 60;
+
 export default async function ServicePortfolioPage({
   params,
 }: {

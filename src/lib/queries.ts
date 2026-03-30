@@ -305,9 +305,9 @@ export type ServiceWithSubServices = Service & {
 }
 
 // Portfolio Types
-type PortfolioClient = Database['public']['Tables']['portfolio_clients']['Row']
+export type PortfolioClient = Database['public']['Tables']['portfolio_clients']['Row']
 type PortfolioClientService = Database['public']['Tables']['portfolio_client_services']['Row']
-type PortfolioProofMedia = Database['public']['Tables']['portfolio_proof_media']['Row']
+export type PortfolioProofMedia = Database['public']['Tables']['portfolio_proof_media']['Row']
 
 export type PortfolioClientWithServices = PortfolioClient & {
   services: Service[]

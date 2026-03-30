@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CTA from "@/components/CTA";
-import { getPortfolioClients } from "@/lib/queries";
+import { getPortfolioClients, type PortfolioClient } from "@/lib/queries";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
@@ -11,8 +11,10 @@ export const metadata = {
   description: "Explore our work with various clients and companies.",
 };
 
+export const revalidate = 60;
+
 export default async function PortfolioPage() {
-  let clients = [];
+  let clients: PortfolioClient[] = [];
   try {
     clients = await getPortfolioClients();
   } catch (error) {

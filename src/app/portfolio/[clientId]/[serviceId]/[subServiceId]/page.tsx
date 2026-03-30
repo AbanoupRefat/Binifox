@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, getSubServiceByIdWithMedia, getPortfolioProofMedia } from "@/lib/queries";
+import { getPortfolioClientById, getSubServiceByIdWithMedia, getPortfolioProofMedia, type PortfolioProofMedia } from "@/lib/queries";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, Image as ImageIcon } from "lucide-react";
@@ -10,6 +10,8 @@ export const metadata = {
   description: "View the proof of concept and gallery of work done for this client sub-service.",
 };
 
+export const revalidate = 60;
+
 export default async function ProofOfConceptGalleryPage({
   params,
 }: {
@@ -18,7 +20,7 @@ export default async function ProofOfConceptGalleryPage({
   const { clientId, serviceId, subServiceId } = await params;
   let client;
   let subService;
-  let proofMedia = [];
+  let proofMedia: PortfolioProofMedia[] = [];
 
   try {
     client = await getPortfolioClientById(clientId);

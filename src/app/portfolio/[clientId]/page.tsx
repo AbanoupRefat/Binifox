@@ -11,6 +11,8 @@ export const metadata = {
   description: "Explore the services we've provided for this client.",
 };
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   try {
     const clients = await getPortfolioClients();
