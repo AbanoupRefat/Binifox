@@ -1,9 +1,9 @@
 /**
  * Converts a Google Drive sharing link to an embeddable preview URL.
  * Handles formats:
- *   https://drive.google.com/file/d/[ID]/view?usp=sharing
- *   https://drive.google.com/open?id=[ID]
- *   https://docs.google.com/*/d/[ID]/
+ *   drive.google.com/file/d/[ID]/view
+ *   drive.google.com/open?id=[ID]
+ *   docs.google.com/TYPE/d/[ID]/
  */
 export function getGDriveEmbedUrl(url: string): string | null {
   if (!url) return null;
