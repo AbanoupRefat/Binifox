@@ -14,7 +14,7 @@ const categories = ["Show All", "Design", "Logo", "Business", "Agency"];
 
 export default function Portfolio() {
   const [activeCategory, setActiveCategory] = useState("Show All");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,13 +101,13 @@ export default function Portfolio() {
           {filteredProjects.map((project) => (
             <div
               key={project.title}
-              className="group relative h-72 overflow-hidden cursor-pointer"
+              className="group relative h-72 overflow-hidden cursor-pointer bg-gray-50 flex items-center justify-center rounded-lg"
             >
               <Image
                 src={project.image}
                 alt={project.title}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
               />
 
               {/* Overlay */}

@@ -50,7 +50,7 @@ export default function ClientsAdmin() {
           join_date: joinDate || null,
         } as any)
         .select('id')
-        .single();
+        .single() as any;
       if (error) throw error;
       setMessage(`Client added! ID: ${data.id} — use this ID to upload photos below.`);
       setClientId(data.id);

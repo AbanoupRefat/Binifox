@@ -1,44 +1,34 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPortfolioClientById, type PortfolioClientWithServices } from "@/lib/queries";
+import { getPortfolioClientById, getPortfolioClients, type PortfolioClientWithServices, type PortfolioClient } from "@/lib/queries";
 import { getIcon } from "@/lib/iconMap";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import Link from "next/link";
 import { ChevronLeft, Facebook, Instagram, Send, ArrowRight } from "lucide-react";
 
-export default function ClientPortfolioPage() {
-  const params = useParams();
-  const clientId = params?.clientId as string;
-  const [client, setClient] = useState<PortfolioClientWithServices | null>(null);
-  const [loading, setLoading] = useState(true);
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    if (!clientId) {
-      setLoading(false);
-      return;
-    }
-    
-    getPortfolioClientById(clientId)
-      .then(setClient)
-      .catch((error) => console.error("Error fetching client details:", error))
-      .finally(() => setLoading(false));
-  }, [clientId]);
-
-  if (loading) {
+export default async function ClientPortfolioPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = await params;
+  
+  if (!clientId) {
     return (
       <>
         <Header />
-        <main className="pt-20 min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        <main className="pt-20">
+          <ErrorFallback message="Invalid client ID" />
         </main>
         <Footer />
       </>
     );
   }
+
+  const [client, allClients] = await Promise.all([
+    getPortfolioClientById(clientId),
+    getPortfolioClients()
+  ]);
+
+  const suggestedClients = allClients.filter((c: PortfolioClient) => c.id !== clientId).slice(0, 3);
 
   if (!client) {
     return (
@@ -144,6 +134,20 @@ export default function ClientPortfolioPage() {
                         </p>
                       </div>
                     )}
+                    {client.services && client.services.length > 0 && (
+                      <div>
+                        <h4 className="text-primary font-teko font-bold uppercase tracking-widest text-lg mb-1">
+                          Services
+                        </h4>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {client.services.map(s => (
+                            <span key={s.id} className="text-sm font-medium bg-primary/20 text-white px-3 py-1 rounded-lg border border-primary/30">
+                              {s.title}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -181,63 +185,109 @@ export default function ClientPortfolioPage() {
               </p>
             </div>
 
-            {client.services && client.services.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {client.services.map((service) => {
-                  const IconComponent = getIcon(service.icon_name);
-                  return (
-                    <Link
-                      key={service.id}
-                      href={`/portfolio/${clientId}/${service.id}`}
-                      className="group bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:border-primary/30 transition-all duration-300 hover:shadow-xl flex flex-col h-full"
-                    >
-                      {/* Service Image */}
-                      <div className="relative h-56 bg-gray-200 overflow-hidden">
-                        {service.image_url ? (
-                          <img
-                            src={service.image_url}
-                            alt={service.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-dark">
-                            <IconComponent className="w-16 h-16 text-primary/40" />
-                          </div>
-                        )}
-                        <div className="absolute top-4 left-4 w-12 h-12 bg-primary flex items-center justify-center rounded-lg shadow-lg">
-                          <IconComponent className="w-6 h-6 text-white" />
-                        </div>
-                      </div>
+            {(() => {
+              const allSubServices = client.services
+                ?.flatMap(s => s.sub_services?.map(sub => ({ ...sub, parentService: s })) || [])
+                .filter(sub => client.active_sub_service_ids?.includes(sub.id)) || [];
+              
+              if (allSubServices.length === 0) {
+                return (
+                  <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 max-w-2xl mx-auto">
+                    <p className="text-gray-500 text-xl font-teko uppercase tracking-wider">
+                      No services assigned yet.
+                    </p>
+                    <p className="text-gray-400 mt-2">
+                      Services provided to this client will appear here.
+                    </p>
+                  </div>
+                );
+              }
 
-                      {/* Service Info */}
-                      <div className="p-8 flex flex-col flex-1">
-                        <h3 className="text-2xl font-teko font-bold text-dark mb-4 group-hover:text-primary transition-colors uppercase tracking-wider">
-                          {service.title}
-                        </h3>
-                        <p className="text-gray-600 mb-8 line-clamp-3 flex-1">
-                          {service.short_description ||
-                            "Specialized professional service delivered with excellence and innovation."}
-                        </p>
-                        <div className="flex items-center gap-2 text-primary font-teko font-bold uppercase tracking-widest text-lg group-hover:gap-4 transition-all">
-                          View Sub-Services <ArrowRight className="w-5 h-5" />
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {allSubServices.map((subService) => {
+                    const IconComponent = getIcon(subService.parentService.icon_name);
+                    return (
+                      <Link
+                        key={subService.id}
+                        href={`/portfolio/${clientId}/${subService.service_id}/${subService.id}`}
+                        className="group bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:border-primary/30 transition-all duration-300 hover:shadow-xl flex flex-col h-full"
+                      >
+                        {/* Sub-Service Image */}
+                        <div className="relative h-56 bg-gray-200 overflow-hidden">
+                          {subService.image_url || subService.parentService.image_url ? (
+                            <img
+                              src={subService.image_url || subService.parentService.image_url || ''}
+                              alt={subService.title}
+                              className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-dark">
+                              <IconComponent className="w-16 h-16 text-primary/40" />
+                            </div>
+                          )}
+                          <div className="absolute top-4 left-4 w-auto px-4 h-10 bg-primary flex items-center justify-center rounded-lg shadow-lg">
+                            <span className="text-white font-teko font-bold uppercase tracking-wider">{subService.parentService.title}</span>
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 max-w-2xl mx-auto">
-                <p className="text-gray-500 text-xl font-teko uppercase tracking-wider">
-                  No services assigned yet.
-                </p>
-                <p className="text-gray-400 mt-2">
-                  Services provided to this client will appear here.
-                </p>
-              </div>
-            )}
+
+                        {/* Sub-Service Info */}
+                        <div className="p-8 flex flex-col flex-1">
+                          <h3 className="text-2xl font-teko font-bold text-dark mb-4 group-hover:text-primary transition-colors uppercase tracking-wider">
+                            {subService.title}
+                          </h3>
+                          <p className="text-gray-600 mb-8 line-clamp-3 flex-1">
+                            {subService.description ||
+                              "Specialized professional service delivered with excellence and innovation."}
+                          </p>
+                          <div className="flex items-center gap-2 text-primary font-teko font-bold uppercase tracking-widest text-lg group-hover:gap-4 transition-all">
+                            View Proof Media <ArrowRight className="w-5 h-5" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </section>
+        {/* Suggested Clients */}
+        {suggestedClients.length > 0 && (
+          <section className="py-20 bg-gray-50 border-t border-gray-100">
+            <div className="container mx-auto px-4 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-teko font-bold text-dark mb-4 uppercase tracking-wider">
+                  Explore More Work
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  See how we've helped other partners achieve their goals.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {suggestedClients.map(suggested => (
+                  <Link
+                    key={suggested.id}
+                    href={`/portfolio/${suggested.id}`}
+                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-primary/30 transition-all duration-300 hover:shadow-xl flex flex-col items-center text-center p-8"
+                  >
+                    <div className="w-24 h-24 mb-6 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-primary transition-colors bg-gray-50 p-2">
+                      {suggested.logo_url ? (
+                        <img src={suggested.logo_url} alt={suggested.name} className="w-full h-full object-contain" />
+                      ) : (
+                         <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-xl uppercase">
+                          {suggested.name.charAt(0)}
+                         </div>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-dark mb-2 group-hover:text-primary transition-colors">{suggested.name}</h3>
+                    <p className="text-sm text-gray-500 uppercase tracking-wider font-medium">{suggested.category || 'Client'}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </>
